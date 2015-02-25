@@ -24,7 +24,7 @@ There are two aspects of the US patent law:
 ### Idea
 Due to the unique role of patent law, it may interest companies to know the ecosystem of the patents that are related to their business and to include this knowledge when they make strategic decisions.
 
-In this project, it is proposed to build an automated system that shows the landscape of the patents of interest and gives search and recommendation service based on user queries. The project will mainly use the data of full-text, transaction record, and maintenance fee record, which are all publically available. 
+In this project, it is proposed to build an automated system that shows the landscape of the patents of interest and gives search and recommendation service based on user queries. The project will mainly use the data of full-text, transaction record, and maintenance fee record, which are all publicly available. 
 
 In addition, the project attempts to gather information about the licensing (authorizing other parties to use) record, the amount of money involved in the patent transaction and litigation, which are usually unavailable.
 
