@@ -21,21 +21,20 @@ from bs4 import BeautifulSoup
 import re
 from dateutil.parser import parse
 from bson.son import SON
+import pandas as pd
+import pickle
 
 def main():
 
 	patent_numbers, patent_links = get_patent_number()
 
+	# get_patent_page_content(patent_numbers, patent_links)
+
 	all_patents = get_patent_content(patent_numbers, patent_links)
 
 	# json.dumps(all_patents, ensure_ascii=False)
 
-
-	# fp = '../data/database.json'
-	# with open(fp, 'w') as f:
-	# 	json.dump(json.dumps(all_patents, ensure_ascii=False), f)
-
-def get_all_field():
+def get_patent_category():
 	url_main = 'http://www.freepatentsonline.com'
 
 def get_patent_number():
@@ -68,40 +67,83 @@ def get_patent_number():
 	print '\nTotal number of links to them:', len(patent_links)
 	print ''
 
+	'''
+	script to store patent numbers in txt file
+	'''
+	# with open('../data/patent_numbers.txt', 'w') as f:
+	# 	for line in patent_numbers:
+	# 		f.write(line + '\n')
+
 	return (patent_numbers, patent_links)
+
+def get_patent_page_content(patent_numbers, patent_links):
+	
+	client = MongoClient('mongodb://localhost:27017/')
+	db = client.patent_database
+	collection = db.patent_html
+
+	patent_records = []
+
+	for num, link in enumerate(patent_links):
+
+		url = 'http://www.freepatentsonline.com' + link
+
+		response = requests.get(url)
+		if response.status_code == 200:
+			html = response.content
+
+			pat_num = patent_numbers[num]
+			row = [{"num": pat_num,
+             		"url": url,
+             		"html":html}]
+			try:
+				collection.insert(row)
+			except DuplicateKeyError:
+				pass
+
+			patent_records.append([pat_num, url, html])
+
+	print "Total number of patents added to database", collection.find().count()
+	print "One example", collection.find_one()
+	print len(patent_records)
+	# pickle.dump()
+	pickle.dump(patent_records, open("../data/patent_records.pkl", "wb"))
+
+
 
 def get_patent_content(patent_numbers, patent_links):
 	
 	client = MongoClient('mongodb://localhost:27017/')
 	db = client.patent_database
-	collection = db.main_content
+	collection = db.patent_fields
 
 	all_patent = {}
 
 	for num, link in enumerate(patent_links):
-
+		print num
 		url = 'http://www.freepatentsonline.com' + link
 		# print url
 
+		raw_dict = {}
 		response = requests.get(url)
 		if response.status_code == 200:
 			html = response.content
 			soup = BeautifulSoup(html, 'html.parser')
 			content = soup.select('div table tr td a')
 			cite_links = [item.get('href') for item in content]
-
 			keys = []
 			vals = []
+			for element in soup.find_all('div', class_='disp_doc2'):
+				elm_title_tag = element.find('div', class_='disp_elm_title')
+				if elm_title_tag:
+					elm_title = elm_title_tag.get_text().strip().strip(':')
+					elm_text_tag = element.find('div', class_='disp_elm_text')
+				if elm_text_tag:
+					elm_text = elm_text_tag.get_text().strip()
+				if elm_title and elm_text:
+					raw_dict[elm_title] = raw_dict.get(elm_title, elm_text)
 
-			for elm_title in soup.find_all('div', class_='disp_elm_title'):
-				keys.append( elm_title.get_text()[:-1] )
 
-			for elm_text in soup.find_all('div', class_='disp_elm_text'):
-				vals.append( elm_text.get_text().strip() )
-
-			raw_dict = {k: v for k, v in zip(keys, vals)}
-
-			
 			'''
 			Title
 			Abstract
@@ -112,11 +154,13 @@ def get_patent_content(patent_numbers, patent_links):
 			Claims
 			Description
 			'''
+
+
 			patent_content = {}
 
-			patent_content['Number'] = patent_numbers[num]
-			patent_content['Title'] = raw_dict.get('Title', None)
-			patent_content['Abstract'] = raw_dict.get('Abstract', None)
+			patent_content[u'Number'] = patent_numbers[num]
+			patent_content[u'Title'] = raw_dict.get(u'Title', None)
+			patent_content[u'Abstract'] = raw_dict.get(u'Abstract', None)
 
 			# date = raw_dict.get('Filing Date', None)
 			# date = parse(date)
@@ -125,29 +169,24 @@ def get_patent_content(patent_numbers, patent_links):
 			# print date
 			# patent_content['Filing Date'] = date
 
-			# patent_content['Filing Date'] = raw_dict.get('Filing Date', None)
-			patent_content['Primary Class'] = raw_dict.get('Primary Class', None)
-			patent_content['Other Classes'] = raw_dict.get('Other Classes', None)
-			patent_content['US Patent References'] = cite_links
-			patent_content['Claims'] = raw_dict.get('Claims', None)
-			patent_content['Description'] = raw_dict.get('Description', None)
+			patent_content[u'Filing Date'] = raw_dict.get(u'Filing Date', None)
+			patent_content[u'Primary Class'] = raw_dict.get(u'Primary Class', None)
+			patent_content[u'Other Classes'] = raw_dict.get(u'Other Classes', None)
+			patent_content[u'US Patent References'] = cite_links
+			patent_content[u'Claims'] = raw_dict.get(u'Claims', None)
+			# patent_content['Description'] = raw_dict.get('Description', None)
 
-			# for k, v in patent_content.iteritems():
-			# 	print k
-			# 	print "---"
-			# 	print v
-			# 	print "==="
-			
+
 			all_patent[patent_numbers[num]] = patent_content
 			try:
 				collection.insert(patent_content)
 			except DuplicateKeyError:
 				pass
+			# break
 
 	print collection.find().count()
 	print collection.find_one()
-	# print len(all_patent)
-	# print type(all_patent[patent_numbers[0]])
+
 	return all_patent
 
 
