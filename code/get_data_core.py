@@ -106,9 +106,6 @@ def get_patent_page_content(patent_numbers, patent_links):
 	print "Total number of patents added to database", collection.find().count()
 	print "One example", collection.find_one()
 	print len(patent_records)
-	# pickle.dump()
-	pickle.dump(patent_records, open("../data/patent_records.pkl", "wb"))
-
 
 
 def get_patent_content(patent_numbers, patent_links):
@@ -143,7 +140,6 @@ def get_patent_content(patent_numbers, patent_links):
 				if elm_title and elm_text:
 					raw_dict[elm_title] = raw_dict.get(elm_title, elm_text)
 
-
 			'''
 			Title
 			Abstract
@@ -154,7 +150,6 @@ def get_patent_content(patent_numbers, patent_links):
 			Claims
 			Description
 			'''
-
 
 			patent_content = {}
 
@@ -175,7 +170,6 @@ def get_patent_content(patent_numbers, patent_links):
 			patent_content[u'US Patent References'] = cite_links
 			patent_content[u'Claims'] = raw_dict.get(u'Claims', None)
 			# patent_content['Description'] = raw_dict.get('Description', None)
-
 
 			all_patent[patent_numbers[num]] = patent_content
 			try:
