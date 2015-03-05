@@ -8,3 +8,6 @@
 *.txt
 MaintFeeEvents*
 reference_code*
+data/*
+database/*
+references/*
