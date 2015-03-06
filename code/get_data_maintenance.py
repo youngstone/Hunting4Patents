@@ -1,37 +1,50 @@
 # python code
 
-# filename:  get_data_maintenance.py
-# ''' INPUT: maintenancefee.txt
-# 	OUTPUT: Patent maintenance database file -> ./my_database/database_maintenance
-# 	POINTS TO: combine_my_data.py
+# filename: get_data_maintenance.py
 # '''
-# Purpose: parse maintenancefee.txt, get maintenance action records for each patent
-# then store all that information into database 'database_maintenance'
+#     INPUT: maintenance_fee_event.txt
+#     OUTPUT: maintenance database -> ./my_database/maintenance.sqlite3
+#     POINTS TO: get_maintenance_events.py
+# '''
+# why: get patent maintenance data
+# how: create a python pipepline to convert .txt file to sqlite3 database
 
-import requests
-import bs4
-import json
-from pymongo import MongoClient
-from pymongo.errors import DuplicateKeyError, CollectionInvalid
-import datetime as dt
-from bs4 import BeautifulSoup
-import re
-from dateutil.parser import parse
-from bson.son import SON
 
-def load_data():
-	filename = '../data/MaintFeeEvents_20150223.txt'
-	f = open(filename)
-	for line in f:
-		print line
-		items = line.split()
-		print len(items)
-		for item in items:
-			print item, len(item)
-		break
+import pandas as pd
+import sqlite3
+
 
 def main():
-	load_data()
+
+    # connect to sqlite3
+    conn = sqlite3.connect('../database/maintenance.sqlite3')
+    c = conn.cursor()
+
+    # create table
+    c.execute(''' DROP TABLE IF EXISTS maintenance''')
+    c.execute('''CREATE TABLE maintenance (
+                    patent varchar(8),
+                    small_entity varchar(1),
+                    maintenance_day varchar(8),
+                    maintenance_event varchar(5)
+                    )''')
+    conn.commit()
+
+    # load data file
+    filename = '../data/MaintFeeEvents_20150223.txt'
+    f = open(filename)
+    # i = 0
+    for line in f:
+        # i += 1
+        # if i % 100000 == 0:
+        #     print i
+        items = line.split()
+        if len(items) == 7:  # insert a valid event record
+            cmd = '''INSERT INTO maintenance VALUES('%s', '%s', '%s', '%s')''' \
+                % (items[0], items[2], items[5], items[6])
+            c.execute(cmd)
+            conn.commit()
+
 
 if __name__ == '__main__':
-	main()
+    main()
