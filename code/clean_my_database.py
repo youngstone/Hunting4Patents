@@ -37,13 +37,13 @@ def create_dataframe():
 
     # set up empty dataframe
     df = pd.DataFrame(columns=[u'Number',
-                                   u'Title',
-                                   u'Filing Date',
-                                   u'US Patent References',
-                                   u'Abstract',
-                                   u'Other Classes',
-                                   u'Primary Class',
-                                   u'Claims'])
+                               u'Title',
+                               u'Filing Date',
+                               u'US Patent References',
+                               u'Abstract',
+                               u'Other Classes',
+                               u'Primary Class',
+                               u'Claims'])
 
     # populate the dataframe with raw data
     for i in data:
@@ -52,18 +52,14 @@ def create_dataframe():
     # clean each column
     df['US Patent References'] = \
         df['US Patent References'].apply(func_clean_reference)
-
     df['Filing Date'] = pd.to_datetime(df['Filing Date'])
-
     df['Other Classes'] = df['Other Classes'].apply(func_clean_class)
-
     df['Primary Class'] = df['Primary Class'].apply(func_clean_class)
-
     df['Claims'] = df['Claims'].apply(func_clean_claim)
-
     df = df.set_index(np.arange(df.shape[0]))
 
-    # print df.head()
+    # store dataframe in pickle file
+    df.to_pickle('../data/dataframe.pkl')
 
 
 def func_clean_reference(citations):

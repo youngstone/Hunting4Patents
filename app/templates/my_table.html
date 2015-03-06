@@ -47,15 +47,19 @@ body { font-size: 140%; }
 <table id="example" class="table table-striped table-bordered" cellspacing="0" width="100%">
         <thead>
             <tr>
-                <th>PX</th>
-                <th>YEAR</th>
+                <th>Patent Number</th>
+                <th>PageRank</th>
+                <th>Default Expire Day</th>
+                <th>Time to Expire</th>
             </tr>
         </thead>
         <tbody>
-            {% for px, yr in data %}
+            {% for pat, pr, expire_day, time_to_expire in data %}
             <tr>
-                <td>{{ px }}</td>
-                <td>{{ yr }}</td>
+                <td>{{ pat }}</td>
+                <td>{{ pr }}</td>
+                <td>{{ expire_day }}</td>
+                <td>{{ time_to_expire }}</td>
             </tr>
             {% endfor %}
         </tbody>
