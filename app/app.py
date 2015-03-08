@@ -25,7 +25,11 @@ def index_hover_table():
     pr = df['PageRank'].values
     expire_day = df['Default Expire Day'].values
     time_to_expire = df['Time to Expire'].values
-    x = zip(pat, pr, expire_day, time_to_expire)
+    # url = 'http://www.freepatentsonline.com/'
+    # link = df['Patent Number'].apply(lambda x: url + x +'.html')
+    url = 'https://www.google.com/patents/'
+    link = df['Patent Number'].apply(lambda x: url + 'US' + x)
+    x = zip(pat, pr, expire_day, time_to_expire, link)
     return render_template('my_table.html', data=x)
 
 

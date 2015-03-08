@@ -54,9 +54,9 @@ body { font-size: 140%; }
             </tr>
         </thead>
         <tbody>
-            {% for pat, pr, expire_day, time_to_expire in data %}
+            {% for pat, pr, expire_day, time_to_expire, link in data %}
             <tr>
-                <td>{{ pat }}</td>
+                <td><a href={{ link }}> {{ pat }} </a></td>
                 <td>{{ pr }}</td>
                 <td>{{ expire_day }}</td>
                 <td>{{ time_to_expire }}</td>
