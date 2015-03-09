@@ -1,6 +1,6 @@
 # python code
 
-# filename:  get_data_core.py
+# filename:  get_data_citation.py
 # '''
 #     INPUT: None
 #     OUTPUT: Patent database file -> ./my_database/patent_database
@@ -42,108 +42,65 @@ def main():
     # scrape patent numbers and links
     patent_numbers, patent_links = get_patent_number()
 
-    '''
-    # scrape patent html content
-    get_patent_html_content(patent_numbers, patent_links)
-    '''
-
-    # scrape patent content and store in fields
-    get_patent_content(patent_numbers, patent_links)
-
-
-def get_patent_category():
-    '''
-    reserved for future use
-    '''
-    url_main = 'http://www.freepatentsonline.com'
+    # scrape patent citation and store in database_citation
+    get_patent_citation(patent_numbers, patent_links)
 
 
 def get_patent_number():
     '''
-    INPUT: None
+    INPUT: patent_numbers.txt
     OUTPUT: list: patent_numbers, list: patent_links
     '''
-    site_urls = []  # to store list of urls of pages of search result
-    num_page = 50  # depends on the number of patents in this category
-    for i in xrange(1, num_page + 1):
-        url = 'http://www.freepatentsonline.com/CCL-424-185.1-p%s.html' \
-              % str(i)
-        site_urls.append(url)
-
-    patent_numbers = []  # to store patent numbers
-    patent_links = []  # to store patent links
-
-    # for each page of search result, get all the patents
-    for url in site_urls:
-        response = requests.get(url)
-        if response.status_code == 200:
-            html = response.content
-            soup = BeautifulSoup(html, 'html.parser')
-            content = soup.select('div table.listing_table tr td a')
-
-            # get all patents in the page
-            pat_links = [item.get('href') for item in content]
-            pat_numbers = [item[1: -5] for item in pat_links]
-
-            # for each patent, store its number and link
-            for i in xrange(len(pat_numbers)):
-                link = pat_links[i]
-                number = pat_numbers[i]
-                patent_links.append(link)
-                patent_numbers.append(number)
-
-    print '\nTotal number of collected patents:', len(patent_numbers)
-    print '\nTotal number of links to them:', len(patent_links)
-    print ''
-
-    '''
-    # to store patent numbers in txt file
-
-    with open('../data/patent_numbers.txt', 'w') as f:
-        for line in patent_numbers:
-            f.write(line + '\n')
-    '''
-
+    url = 'https://www.google.com/patents/'
+    with open('../data/patent_numbers.txt') as f:
+        content = f.readlines()
+        patent_numbers = [x.strip() for x in content]
+        patent_links = [url + 'US' + x for x in patent_numbers]
     return (patent_numbers, patent_links)
 
 
-def get_patent_html_content(patent_numbers, patent_links):
+def get_patent_citation(patent_numbers, patent_links):
     '''
     INPUT: patent_numbers, patent_links
-    OUTPUT: mongodb database: patent_database, collection: patent_html
+    OUTPUT: mongodb database: patent_database, collection: patent_citation
     '''
 
     # launch mongodb
     client = MongoClient('mongodb://localhost:27017/')
     db = client.patent_database
-    collection = db.patent_html
+    collection = db.patent_citation
 
     patent_records = []
 
     for num, link in enumerate(patent_links):
 
-        url = 'http://www.freepatentsonline.com' + link
+        url = link
 
         response = requests.get(url)
         if response.status_code == 200:
-            html = response.content
+            # html = response.content
 
             pat_num = patent_numbers[num]
-            row = [{"num": pat_num,
-                    "url": url,
-                    "html": html}]
-            try:
-                collection.insert(row)
-            except DuplicateKeyError:
-                pass
+            # row = [{"num": pat_num,
+            #         "url": url,
+            #         "html": html}]
+            # try:
+            #     collection.insert(row)
+            # except DuplicateKeyError:
+            #     pass
 
-            patent_records.append([pat_num, url, html])
+            patent_records.append([pat_num, url])  #, html])
+            if num % 100 == 0:
+                print num
+        else:
+            print patent_numbers[num], url
 
     print "Total number of patents added to database"
-    print collection.find().count()
-    print "One example"
-    print collection.find_one()
     print len(patent_records)
+    # print collection.find().count()
+    # print "One example"
+    # print collection.find_one()
+    # print len(patent_records)
 
 
 def get_patent_content(patent_numbers, patent_links):
