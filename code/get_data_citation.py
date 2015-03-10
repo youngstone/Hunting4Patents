@@ -55,7 +55,8 @@ def get_patent_citation(patent_numbers, patent_links):
 
     patent_records = []
 
-    tab_features = ['backward-citations',
+    tab_features = ['patent-number',
+                    'backward-citations',
                     'npl-citations',
                     'forward-citations',
                     'classifications',
@@ -74,12 +75,16 @@ def get_patent_citation(patent_numbers, patent_links):
             if num % 100 ==0:
                 print num
             # print url
+
             html = response.content
             soup = BeautifulSoup(html, 'html.parser')
-            content = soup.find_all('div',
+
+            patent_tab_features['patent-number'] = patent_numbers[num]
+
+            tab_content = soup.find_all('div',
                                 class_='patent-section patent-tabular-section')
-            
-            for con in content:
+
+            for con in tab_content:
                 subject = con.find('a')['id']
                 if subject == 'backward-citations':
                     rows = con.find_all('tr') 
@@ -101,6 +106,7 @@ def get_patent_citation(patent_numbers, patent_links):
 
                 elif subject == 'classifications':
                     pass
+                    # reserved for future development
 
                 elif subject == 'legal-events':
                     rows = con.find_all('tr')
