@@ -1,6 +1,6 @@
 # python code
 
-# filename: calc_pagerank.py
+# filename: calc_pagerank_for_selected_subset.py
 # '''
 #     INPUT: None
 #     OUTPUT: csv file -> ./data/selected_patent.csv
