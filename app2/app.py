@@ -8,6 +8,9 @@ import cPickle as pkl
 
 
 app = Flask(__name__)
+print "loading..."
+with open('../data/patent_matcher.pkl', 'rb') as handle:
+    matcher = pkl.load(handle)
 
 
 # OUR HOME PAGE
@@ -29,8 +32,8 @@ def index_hover_table():
     claims = request.form.get('claims', None)
 
     # Initialize PatentMatcher
-    with open('../data/patent_matcher.pkl', 'rb') as handle:
-            matcher = pkl.load(handle)
+    # with open('../data/patent_matcher.pkl', 'rb') as handle:
+    #         matcher = pkl.load(handle)
 
     # Fit the query
     matcher.fit(title, abstract, claims)
@@ -53,7 +56,7 @@ def index_hover_table():
     # url = 'http://www.freepatentsonline.com/'
     # link = df['Patent Number'].apply(lambda x: url + x +'.html')
     url = 'https://www.google.com/patents/'
-    link = df['Patent Number'].apply(lambda x: url + 'US' + x)
+    link = df_filtered['Patent Number'].apply(lambda x: url + 'US' + x)
     x = zip(pat, sim, pr, expire_day, time_to_expire, link)
     return render_template('my_table.html', data=x)
 
