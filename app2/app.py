@@ -6,11 +6,13 @@ import pandas as pd
 import re
 import cPickle as pkl
 
-
 app = Flask(__name__)
-print "loading..."
-with open('../data/patent_matcher.pkl', 'rb') as handle:
-    matcher = pkl.load(handle)
+
+def run_on_start():
+    print "loading..."
+    with open('../data/patent_matcher.pkl', 'rb') as handle:
+        matcher = pkl.load(handle)
+    return matcher
 
 
 # OUR HOME PAGE
@@ -36,8 +38,8 @@ def index_hover_table():
     #         matcher = pkl.load(handle)
 
     # Fit the query
-    matcher.fit(title, abstract, claims)
-    patents, scores = matcher.recommendations, matcher.similarity_scores
+    app.matcher.fit(title, abstract, claims)
+    patents, scores = app.matcher.recommendations, app.matcher.similarity_scores
 
     # print 'title:', '==' + title + '=='
     # print 'title:', '==' + abstract + '=='
@@ -62,4 +64,5 @@ def index_hover_table():
 
 
 if __name__ == '__main__':
+    app.matcher = run_on_start()
     app.run(host='0.0.0.0', port=7878, debug=True)

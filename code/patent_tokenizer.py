@@ -9,7 +9,7 @@ class PatentTokenizer(object):
     def __init__(self, ngram_range=(1, 1), use_stem=False):
         self.ngram_range = ngram_range
         self.use_stem = use_stem
-        self.max_features = None
+        self.max_features = 2000
         self.title_vectorizer = TfidfVectorizer(stop_words='english',
                   ngram_range=self.ngram_range, max_features=self.max_features)
         self.abstract_vectorizer = TfidfVectorizer(stop_words='english',
