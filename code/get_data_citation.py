@@ -81,6 +81,16 @@ def get_patent_citation(patent_numbers, patent_links):
 
             patent_tab_features['patent-number'] = patent_numbers[num]
 
+            table = soup.find('table', class_='patent-bibdata')
+            tr = table.find_all('tr')
+            for td in tr:
+                head = td.find('td', class_='patent-bibdata-heading')
+                body = td.find('td', class_='single-patent-bibdata')
+
+                if head is not None and body is not None:
+                    print head.get_text(), body.get_text()
+
+
             tab_content = soup.find_all('div',
                                 class_='patent-section patent-tabular-section')
 
