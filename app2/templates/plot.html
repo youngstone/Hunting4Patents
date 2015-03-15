@@ -1,0 +1,205 @@
+<html>
+<head>
+    <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
+<!-- https://datatables.net/examples/styling/bootstrap.html -->
+
+<!-- load D3js -->
+<script src="http://www.d3plus.org/js/d3.js"></script>
+ 
+<!-- load D3plus after D3js -->
+<script src="http://www.d3plus.org/js/d3plus.js"></script>
+ 
+<link rel="stylesheet" type="text/css" href=
+"https://cdn.datatables.net/plug-ins/380cb78f450/integration/bootstrap/3/dataTables.bootstrap.css">
+<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.3/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/plug-ins/380cb78f450/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+
+  <script src="lib/d3.js"></script>
+    <script src="lib/nv.d3.js"></script>
+
+    <link href="lib/nv.d3.css" rel="stylesheet" type="text/css">
+
+
+<style type="text/css" class="init">
+
+
+body { font-size: 140%; }
+</style>
+    <title></title>
+
+</head>
+<body>
+<div class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <!-- <a class="navbar-brand" href="/">Flasky</a> -->
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<iframe width="550" height="550" frameborder="0" seamless="seamless" scrolling="no" src= {{ data }}></iframe>
+                                
+
+
+<!--   <div class="centered">
+    <a href="/">Go Back</a>
+  </div>
+ -->
+
+<iframe width="550" height="550" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~atombo/93/linear-spline-vhv-hvh-vh-hv/"></iframe>
+
+ 
+<!-- <div>
+    <a href="https://plot.ly/~Dreamshot/212/" target="_blank" title="Public Transport Use in North America" style="display: block; text-align: center;"><img src="https://plot.ly/~Dreamshot/212.png" alt="Public Transport Use in North America" style="max-width: 100%;width: 750px;"  width="750" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
+    <script data-plotly="Dreamshot:212" src="https://plot.ly/embed.js" async></script>
+</div> -->
+
+<!-- <div id="viz"> fdf </div> -->
+
+
+
+
+<div id='chart'> <svg></svg></div>
+
+</body>
+</html>
+<script>
+$(document).ready(function() {
+    $('#example').dataTable();
+} );
+</script>
+
+<script>
+
+    // var sample_data = graph_data[0]
+    // var positions = graph_data[1]
+    // var connections = graph_data[2]
+  // // create sample dataset
+  d3.json("../../datafile/8961986.json", function(error, data2){
+     var pdata = [];
+     for (var year in data2) {
+        pdata.push({x: +year, y: +data2[year]})
+     }
+
+
+    nv.addGraph(function(){
+       var chart2 = nv.models.lineChart()
+           .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
+           .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
+           // .transitionDuration(350)  //how fast do you want the lines to transition?
+           .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+           .showYAxis(true)        //Show the y-axis
+           .showXAxis(true)        //Show the x-axis
+           .interpolate("monotone")
+           ;
+
+       chart2.xAxis     //Chart x-axis settings
+           .axisLabel('Year')
+           .tickFormat(d3.format('r'));
+
+       chart2.yAxis     //Chart y-axis settings
+           .axisLabel('Topic Occurrence Index')
+           .tickFormat(d3.format('.04f'));
+
+       /* Done setting the chart up? Time to render it!*/
+       // var myData = sinAndCos();   //You need data...
+
+       d3.select('#chart svg')    //Select the <svg> element you want to render the chart in.   
+           .datum(pdata)         //Populate the <svg> element with chart data...
+           .call(chart2);          //Finally, render the chart!
+
+       //Update the chart when window resizes.
+       // nv.utils.windowResize(function() { chart.update() });
+       return chart2;
+     })
+   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // var sample_data = [
+  //   {"year": "123123", "Year": "10"},
+  //   {"name": "beta", "size": 12},
+  //   {"name": "gamma", "size": 30},
+  //   {"name": "delta", "size": 26},
+  //   {"name": "epsilon", "size": 12},
+  //   {"name": "zeta", "size": 26},
+  //   {"name": "theta", "size": 11},
+  //   {"name": "eta", "size": 24}
+  // ]
+  // // debugger;
+  // // create list of node positions
+  // var positions = [
+  //   {"name": "alpha", "x": 10, "y": 15},
+  //   {"name": "beta", "x": 12, "y": 24},
+  //   {"name": "gamma", "x": 16, "y": 18},
+  //   {"name": "delta", "x": 26, "y": 21},
+  //   {"name": "epsilon", "x": 13, "y": 4},
+  //   {"name": "zeta", "x": 31, "y": 13},
+  //   {"name": "theta", "x": 19, "y": 8},
+  //   {"name": "eta", "x": 24, "y": 11}
+  // ]
+
+  // // create list of node connections
+  // var connections = [
+  //   {"source": "alpha", "target": "beta"},
+  //   {"source": "alpha", "target": "gamma"},
+  //   {"source": "beta", "target": "delta"},
+  //   {"source": "beta", "target": "epsilon"},
+  //   {"source": "zeta", "target": "gamma"},
+  //   {"source": "theta", "target": "gamma"},
+  //   {"source": "eta", "target": "gamma"}
+  // ]
+
+  // // instantiate d3plus
+  // var visualization = d3plus.viz()
+  //   .container("#viz")  // container DIV to hold the visualization
+  //   .type("network")    // visualization type
+  //   .data(sample_data)  // sample dataset to attach to nodes
+  //   .nodes(positions)   // x and y position of nodes
+  //   .edges(connections) // list of node connections
+  //   .size("size")       // key to size the nodes
+  //   .id("name")         // key for which our data is unique on
+  //   .draw()             // finally, draw the visualization!
+
+</script>
