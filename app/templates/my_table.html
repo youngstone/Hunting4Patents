@@ -31,7 +31,7 @@ body { font-size: 140%; }
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">Flasky</a>
+            <!-- <a class="navbar-brand" href="/">Flasky</a> -->
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
@@ -48,15 +48,17 @@ body { font-size: 140%; }
         <thead>
             <tr>
                 <th>Patent Number</th>
+                <th>Similarity</th>
                 <th>PageRank</th>
                 <th>Default Expire Day</th>
                 <th>Time to Expire</th>
             </tr>
         </thead>
         <tbody>
-            {% for pat, pr, expire_day, time_to_expire, link in data %}
+            {% for pat, sim, pr, expire_day, time_to_expire, link in data %}
             <tr>
                 <td><a href={{ link }}> {{ pat }} </a></td>
+                <td>{{ sim }}</td>
                 <td>{{ pr }}</td>
                 <td>{{ expire_day }}</td>
                 <td>{{ time_to_expire }}</td>
@@ -68,6 +70,19 @@ body { font-size: 140%; }
                                    
 {% endblock %}
 
+<!--   <div class="centered">
+    <a href="/">Go Back</a>
+  </div>
+ -->
+
+<!-- <iframe width="550" height="550" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~Dreamshot/212.embed?width=550&height=550"></iframe>
+ -->
+ 
+<!-- <div>
+    <a href="https://plot.ly/~Dreamshot/212/" target="_blank" title="Public Transport Use in North America" style="display: block; text-align: center;"><img src="https://plot.ly/~Dreamshot/212.png" alt="Public Transport Use in North America" style="max-width: 100%;width: 750px;"  width="750" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
+    <script data-plotly="Dreamshot:212" src="https://plot.ly/embed.js" async></script>
+</div>
+ -->
 </body>
 </html>
 <script>
