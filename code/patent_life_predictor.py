@@ -23,13 +23,11 @@ from nltk.stem.snowball import SnowballStemmer
 import re
 from patent_tokenizer import PatentTokenizer
 
-import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 from scipy import interp
 from sklearn.cross_validation import KFold
 from sklearn.preprocessing import StandardScaler
-
 from pandas.core.reshape import get_dummies
 
 
@@ -70,59 +68,122 @@ def plot_roc(X, y, clf_class, **kwargs):
     plt.show()
 
 
+# below are some utility functions
+
+def events_count(entry):
+    code = []
+    if type(entry) != float:
+        for event in entry:
+            code.append(event['Code'])
+    return Counter(code)
+
+def get_code(entry):
+    code = []
+    if type(entry) != float:
+        for event in entry:
+            code.append(event['Code'])
+    return code
+
+def get_date(entry):
+    date = []
+    if type(entry) != float:
+        for event in entry:
+            dt = event['Date']
+            dt_dt = datetime.strptime(dt, '%b %d, %Y')
+            date.append(dt_dt)
+    return date
+
+def determine_early_termination(fil_dat, code):
+    today = date.today() 
+    screening_day = datetime(today.year - 20, today.month, today.day)
+    if fil_dat.to_datetime() < screening_day:
+        return 0
+    elif 'FP' in code:
+        return 1
+    else:
+        return -1
+
+
 class PatentLongevityPredictor(object):
 
     def __init__(self):
         self.df = None
+        self.df_transformed = None
+        self.df_train = None
+        self.df_test = None
+        self.train_features = None
+        self.train_target = None
+
         self.features = None
         self.target = None
         self.predict_model = None
         self.vectorizer = None
         self.test_prediction = None
+        self.patent_tokenizer = None
+        self.patent_vectors = None
 
-    def initialization(self, file_name):
-        df_input = pd.read_pickle(file_name)
+    def initialization(self, df_input):
+        print "initializing PatentLongevityPredictor..."
+
         self.df = df_input
 
+        cond = df_input['Filing Date'].apply(lambda x: type(x)) == pd.tslib.NaTType
+        self.df = df_input[~cond]
+
         df_transformed = self.transform(self.df)
-        
+        self.df_transformed = df_transformed
+
+        # print df_transformed.head()
+
         self.df_train = df_transformed[df_transformed['Patent Status'] != -1]
         self.df_test = df_transformed[df_transformed['Patent Status'] == -1]
 
-        self.train_features = 
-        self.train_target = 
+        self.train_features = self.df_train.drop(['Patent Status'], axis=1)
+        self.train_target = self.df_train['Patent Status']
 
-        self.test_features = 
-        # self.test_prediction = None
+        self.test_features = self.df_test.drop(['Patent Status'], axis=1)
 
-        best_estimator_ = self.build_model(self.features, self.target)
+        best_estimator_ = self.build_model(self.train_features, 
+                                           self.train_target)
 
         self.predict_model = best_estimator_
 
         return
 
-    def fit(self):
-
-        pass
-
-    # def transform(self, vectorizer):
-    #     self.vectorizer = vectorizer
 
 
-    #     self.X_train = 
-    #     self.y_train = 
-    #     self.
-    #     pass
+    def predict(self):
+        print "predicting..."
+        features = self.df_transformed.drop(['Patent Status'], axis=1)
+        rf_best = self.predict_model
+        y_predict = rf_best.predict(features)
+        print "number of predictions:"
+        print y_predict.shape
 
-    def predict(self, df_test):
-        df_test = df_test
-        self.X_test = 
-        pass
+        self.prediction = y_predict
+        print "predictions:"
+        print y_predict
+        return
 
     def transform(self, df):
-        df = df
-        cond = df['Filing Date'].apply(lambda x: type(x)) == pd.tslib.NaTType
-        df = df[~cond]
+        print "transforming input dataframe..."
+
+        # cond = df['Filing Date'].apply(lambda x: type(x)) == pd.tslib.NaTType
+        # df = df[~cond]
+        ###
+        # print df['Filing Date'].values[-10:]
+        # min_day = df['Filing Date'].min()
+        # print min_day
+        # print type(min_day)
+        # min_day = min_day.to_datetime()
+        # print min_day
+        # print type(min_day)
+        # print df.info()
+
+        # df['Filing Date'] = df['Filing Date'].apply(lambda x: \
+        #                     min_day if type(x) == pd.tslib.NaTType else x)
+        ###
+        print df['Filing Date'].values[-10:]
 
         cod = df['legal-events'].apply(get_code)
         dat = df['legal-events'].apply(get_date)
@@ -134,7 +195,6 @@ class PatentLongevityPredictor(object):
 
         patent_status = pd.Series(data=end)
         df['Patent Status'] = patent_status
-
         
         feature_names = [u'Patent Number',
                          u'Title', 
@@ -150,15 +210,124 @@ class PatentLongevityPredictor(object):
                          u'forward-citations-by-inventor', 
                          u'Patent Status']
 
+        df = df[feature_names]
+
+        df = df.rename(columns={'Patent Number': 'Number'})
+
+        df['num_of_claims'] = df['Claims'].apply(len)
+
+        # df['num_of_claims'] = df['Claims'].apply(lambda x: \
+        #                             0 if type(x) == float else len(x))
+
+        fwd_cit_ratio_inv_exm = []
+        fwd_cit_inv = df['forward-citations-by-inventor']
+        fwd_cit_exm = df['forward-citations-by-examiner']
+        fwd_cit_ratio_inv_exm = [float(i) / (i + e) \
+                                for i, e in zip(fwd_cit_inv, fwd_cit_exm)]
+
+        df['fwd_cit_ratio_inv_exm'] = fwd_cit_ratio_inv_exm
+        df['fwd_cit_ratio_inv_exm'] = \
+            df['fwd_cit_ratio_inv_exm'].fillna(float(1))
+
+        bwd_cit_ratio_inv_exm = []
+        bwd_cit_inv = df['backward-citations-by-inventor']
+        bwd_cit_exm = df['backward-citations-by-examiner']
+        bwd_cit_ratio_inv_exm = [float(i) / (i + e) \
+                                 for i, e in zip(bwd_cit_inv, bwd_cit_exm)]
+
+        df['bwd_cit_ratio_inv_exm'] = bwd_cit_ratio_inv_exm
+        df['bwd_cit_ratio_inv_exm'] = \
+                                 df['bwd_cit_ratio_inv_exm'].fillna(float(1))
+
+        df['bwd_pat_cit_count'] = df['backward-citations'].apply(len)
+        # df['bwd_pat_cit_count'] = df['backward-citations'].apply(lambda x: \
+        #                             0 if type(x) == float else len(x))
+        df['Primary Class'] = df['Primary Class'].apply(lambda x: x[0])
+        # df['Primary Class'] = df['Primary Class'].apply(lambda x: \
+        #                                 np.nan if type(x) == float else x[0])
+        df['npl-citations'] = df['npl-citations'].fillna(1)
+
+        df['Claims'] = df['Claims'].apply(lambda x: ' '.join(x))
 
 
-        return df_**
+        drop_columns = ['US Patent References',
+                        'forward-citations-by-inventor', 
+                        'forward-citations-by-examiner',
+                        'backward-citations-by-inventor', 
+                        'backward-citations-by-examiner',
+                        'backward-citations']
+
+        df_model = df.drop(drop_columns, axis=1)
+
+        # print "something"
+        # print df_model.columns.tolist().index('Patent Status')
+
+
+        df_rf_features = self.add_claim_vectorization(df_model)
+
+        # print "something new"
+        # print df_rf_features.columns.tolist().index('Patent Status')
+
+        return df_rf_features
+
+    def add_claim_vectorization(self, df_model):
+        print "adding claim vectorization..."
+
+        df_model = df_model
+
+        file_path = '../data/df_model.pkl'
+        df_model.to_pickle(file_path)
+
+        patent_tokenizer = PatentTokenizer()
+        patent_tokenizer.set_df(file_path)
+        patent_tokenizer.set_vectors()
+
+        patent_claims_vectorizer = patent_tokenizer.get_claims_vectorizer()
+        patent_claims_vectors = patent_tokenizer.get_claims_vectors()
+
+        self.patent_tokenizer = patent_claims_vectorizer
+        self.patent_vectors = patent_claims_vectors
+
+
+        claims_features_name = patent_claims_vectorizer.get_feature_names()
+
+        # print len(claims_features_name)
+        # print patent_claims_vectors.shape
+
+        df_claims_features = pd.DataFrame(data=patent_claims_vectors, 
+                                          index=df_model.index, 
+                                          columns=claims_features_name)
+
+        df_merge = pd.merge(df_model, df_claims_features, 
+                            how='inner', left_index=True, 
+                            right_index=True)
+
+        # target = df_merge['Patent Status']
+
+
+        non_needed = ['Number', 'Title', 'Abstract', 'Claims']
+        df_temp = df_merge.drop(non_needed, axis=1)
+
+        dummy_class = get_dummies(df_temp['Primary Class'], 
+                                  dummy_na=True, 
+                                  prefix='primary_class')
+
+        df_rf_features = pd.merge(df_temp, dummy_class, 
+                                  how='inner', left_index=True, 
+                                  right_index=True)
+
+        df_rf_features = df_rf_features.drop(['Primary Class'], axis=1)
+
+        return df_rf_features
 
 
     def build_model(self, features, target):
-        X = features
-        y = target
-        X_train, X_test, y_train, y_test = train_test_split(X, y)
+        print "building the prediction model..."
+        X = features.values
+        y = target.values
+
+        X_train, y_train = X, y
+        # X_train, X_test, y_train, y_test = train_test_split(X, y)
 
         rf_grid = {'max_depth': [3, None],
            'max_features': ['sqrt', 'log2', 10, 20, 40],
@@ -174,216 +343,38 @@ class PatentLongevityPredictor(object):
 
         return rf_best
 
-    def grid_search(est, grid, X_train, y_train):
+    def grid_search(self, est, grid, X_train, y_train):
         grid_cv = GridSearchCV(est, grid, n_jobs=-1, verbose=True,
-                            scoring='mean_squared_error').fit(X_train, y_train)
+                        scoring='mean_squared_error').fit(X_train, y_train)
         return grid_cv
 
-    # below are some utility functions
+    def plot_result(self):
+        rf_best = self.predict_model
+        X_test = self.train_features
+        y_test = self.train_target
+        print "score:", rf_best.score(X_test, y_test)
+        y_predict = rf_best.predict(X_test)
+        print "confusion matrix:"
+        print confusion_matrix(y_test, y_predict)
+        print "precision:", precision_score(y_test, y_predict)
+        print "recall:", recall_score(y_test, y_predict)
+        return
 
-    def events_count(self, entry):
-    code = []
-    if type(entry) != float:
-        for event in entry:
-            code.append(event['Code'])
-    return Counter(code)
-
-    def get_code(self, entry):
-        code = []
-        if type(entry) != float:
-            for event in entry:
-                code.append(event['Code'])
-        return code
-
-    def get_date(self, entry):
-        date = []
-        if type(entry) != float:
-            for event in entry:
-                dt = event['Date']
-                dt_dt = datetime.strptime(dt, '%b %d, %Y')
-                date.append(dt_dt)
-        return date
-
-    def determine_early_termination(self, fil_dat, code):
-        today = date.today() 
-        screening_day = datetime(today.year - 20, today.month, today.day)
-        if fil_dat.to_datetime() < screening_day:
-            return 0
-        elif 'FP' in code:
-            return 1
-        else:
-            return -1
-
-
-
-
-################
-
-
-
-
-# In[15]:
-
-
-
-# In[16]:
-
-
-
-# In[17]:
-
-
-
-
-# In[18]:
-
-
-
-
-# In[19]:
-
-screened_df = screened_df[feature_names]
-screened_df = screened_df.rename(columns={'Patent Number': 'Number'})
-
-screened_df['num_of_claims'] = screened_df['Claims'].apply(len)
-
-fwd_cit_ratio_inv_exm = []
-fwd_cit_inv = screened_df['forward-citations-by-inventor']
-fwd_cit_exm = screened_df['forward-citations-by-examiner']
-fwd_cit_ratio_inv_exm = [float(i) / (i + e) for i, e in zip(fwd_cit_inv, fwd_cit_exm)]
-screened_df['fwd_cit_ratio_inv_exm'] = fwd_cit_ratio_inv_exm
-screened_df['fwd_cit_ratio_inv_exm'] = screened_df['fwd_cit_ratio_inv_exm'].fillna(float(1))
-
-
-bwd_cit_ratio_inv_exm = []
-bwd_cit_inv = screened_df['backward-citations-by-inventor']
-bwd_cit_exm = screened_df['backward-citations-by-examiner']
-bwd_cit_ratio_inv_exm = [float(i) / (i + e) for i, e in zip(bwd_cit_inv, bwd_cit_exm)]
-screened_df['bwd_cit_ratio_inv_exm'] = bwd_cit_ratio_inv_exm
-screened_df['bwd_cit_ratio_inv_exm'] = screened_df['bwd_cit_ratio_inv_exm'].fillna(float(1))
-
-screened_df['bwd_pat_cit_count'] = screened_df['backward-citations'].apply(len)
-screened_df['Primary Class'] = screened_df['Primary Class'].apply(lambda x: x[0])
-screened_df['npl-citations'] = screened_df['npl-citations'].fillna(0)
-
-screened_df['Claims'] = screened_df['Claims'].apply(lambda x: ' '.join(x))
-
-
-drop_columns = ['US Patent References',
-                'forward-citations-by-inventor', 
-                'forward-citations-by-examiner',
-                'backward-citations-by-inventor', 
-                'backward-citations-by-examiner',
-                'backward-citations']
-
-df_model = screened_df.drop(drop_columns, axis=1)
-
-
-
-save_path = '../data/df_model.pkl'
-df_model.to_pickle(save_path)
-
-patent_tokenizer = PatentTokenizer()
-patent_tokenizer.set_df(save_path)
-patent_tokenizer.set_vectors()
-
-patent_title_vectorizer = patent_tokenizer.get_title_vectorizer()
-patent_abstract_vectorizer = patent_tokenizer.get_abstract_vectorizer()
-patent_claims_vectorizer = patent_tokenizer.get_claims_vectorizer()
-
-patent_title_vectors = patent_tokenizer.get_title_vectors()
-patent_abstract_vectors = patent_tokenizer.get_abstract_vectors()
-patent_claims_vectors = patent_tokenizer.get_claims_vectors()
-
-
-
-claims_features_name = patent_claims_vectorizer.get_feature_names()
-
-df_claims_features = pd.DataFrame(data=patent_claims_vectors, index=df_model.index, columns=claims_features_name)
-
-df_merge = pd.merge(df_model, df_claims_features, how='inner', left_index=True, right_index=True)
-
-
-
-target = df_merge['Patent Status']
-
-
-non_needed = ['Number', 'Title', 'Abstract', 'Claims', 'Patent Status']
-features = df_merge.drop(non_needed, axis=1)
-
-
-
-
-
-# In[40]:
-
-# cols_v = get_dummies(df['venue_country'], dummy_na=True, prefix='venue_country')
-dummy_class = get_dummies(features['Primary Class'], dummy_na=True, prefix='primary_class')
-
-
-# In[41]:
-
-df_rf_features = pd.merge(features, dummy_class, how='inner', left_index=True, right_index=True)
-
-
-# In[42]:
-
-df_rf_features = df_rf_features.drop(['Primary Class'], axis=1)
-
-
-# In[43]:
-
-df_rf_features < 0
-
-
-# In[44]:
-
-
-
-# In[45]:
-
-y = target.values
-X = df_rf_features.values
-
-
-
-
-
-
-
-
-print "score:", rf_best.score(X_test, y_test)
-y_predict = rf_best.predict(X_test)
-print "confusion matrix:"
-print confusion_matrix(y_test, y_predict)
-print "precision:", precision_score(y_test, y_predict)
-print "recall:", recall_score(y_test, y_predict)
-
-
-
-rf_best.feature_importances_
-
-
-# In[65]:
-
-importances = rf_best.feature_importances_[:n]
-indices = np.argsort(importances)[::-1]
-
-# Print the feature ranking
-print("Feature ranking:")
-
-for f in range(n):
-    print("%d. %s (%f)" % (f + 1, df_rf_features.columns[indices[f]], importances[indices[f]]))
-
-
-def load_dataframe():
-    print "loading dataframe..."
-    with open('../data/patent_dataframe.pkl', 'rb') as handle:
-        df = pkl.load(handle)
-    return df
 
 if __name__ == '__main__':
-    pass
+
+    print "starting..."
+
+    with open('../data/patent_dataframe.pkl', 'rb') as handle:
+        df_input = pkl.load(handle)
+
+    plr = PatentLongevityPredictor()
+    plr.initialization(df_input)
+    plr.plot_result()
+    plr.predict()
+
+
+
 
 
 
