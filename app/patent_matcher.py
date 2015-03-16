@@ -5,7 +5,6 @@ import re
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.metrics.pairwise import linear_kernel
 from patent_tokenizer import PatentTokenizer
-import graphlab as gl
 
 
 class PatentMatcher(object):
@@ -32,7 +31,6 @@ class PatentMatcher(object):
         self.similarity_abstract = None
         self.similarity_claims = None
 
-
         self.ngram_range = ngram_range
         self.use_tagger = use_tagger
         self.use_stem = use_stem
@@ -44,7 +42,7 @@ class PatentMatcher(object):
         '''
         fit the input data with the model
         '''
-        print 'fitting the model'
+        print "fitting the model..."
         self.initializer(title, abstract, claims)
 
         self.vectorize_title()
@@ -53,6 +51,7 @@ class PatentMatcher(object):
 
         self.find_similarity()
         self.recommend()
+        return
 
     def not_empty_entry(self, entry):
         '''
@@ -62,17 +61,56 @@ class PatentMatcher(object):
         '''
         return False if entry == '' or re.match(r'^\s*$', entry) else True
 
+    def calc_tokenizer_and_vectors(self):
+
+        print "Launching PatentTokenizer..."
+        patent_tokenizer = PatentTokenizer()
+        patent_tokenizer.set_df('../data/patent_text_df.pkl')
+
+        print "Loading dataframe..."
+        patent_tokenizer.set_vectors()
+
+        print "Getting result..."
+        print "    getting vectorizers..."
+        patent_title_vectorizer = patent_tokenizer.get_title_vectorizer()
+        patent_abstract_vectorizer = patent_tokenizer.get_abstract_vectorizer()
+        patent_claims_vectorizer = patent_tokenizer.get_claims_vectorizer()
+
+        print "    getting vectors..."
+        patent_title_vectors = patent_tokenizer.get_title_vectors()
+        patent_abstract_vectors = patent_tokenizer.get_abstract_vectors()
+        patent_claims_vectors = patent_tokenizer.get_claims_vectors()
+
+        print "Saving to memory..."
+        print "    saving vectorizers..."
+        self.title_vectorizer = patent_tokenizer.get_title_vectorizer()
+        self.abstract_vectorizer = patent_tokenizer.get_abstract_vectorizer()
+        self.claims_vectorizer = patent_tokenizer.get_claims_vectorizer()
+
+        print "    saving vectors..."
+        self.database_title_vectors = patent_title_vectors
+        self.database_abstract_vectors = patent_abstract_vectors
+        self.database_claims_vectors = patent_claims_vectors
+
+        print "PatentTokenizer loaded."
+
+        return
+
     def load_tokenizer_and_database(self):
-        print 'loading tokenizer'
+        '''
+        Used for loading from existing tokenizer and tokenized vectors
+        '''
+        print "Loading pre-calculated tokenizer..."
         # load the tokenizer
         with open('../data/patent_tokenizer.pkl', 'rb') as handle:
             patent_tokenizer = pkl.load(handle)
+        print "PatentTokenizer loaded."
 
         self.title_vectorizer = patent_tokenizer.get_title_vectorizer()
         self.abstract_vectorizer = patent_tokenizer.get_abstract_vectorizer()
         self.claims_vectorizer = patent_tokenizer.get_claims_vectorizer()
 
-        print 'loading pre-calculated vectors'
+        print "Loading pre-calculated vectors..."
         # load the vectors
         with open('../data/patent_title_vectors.pkl', 'rb') as handle:
             self.database_title_vectors = pkl.load(handle)
@@ -80,12 +118,16 @@ class PatentMatcher(object):
             self.database_abstract_vectors = pkl.load(handle)
         with open('../data/patent_claims_vectors.pkl', 'rb') as handle:
             self.database_claims_vectors = pkl.load(handle)
+        print "Vectors loaded."
+
+        return
 
     def initializer(self, title, abstract, claims):
-        print 'initializing'
+        print "initializing..."
         self.title = [title]
         self.abstract = [abstract]
         self.claims = [claims]
+        return
 
     def stem_text(self, text):
         # stem each word in the text
@@ -102,18 +144,21 @@ class PatentMatcher(object):
         if self.use_stem:
             title = self.stem_text(title)
         self.title_vector = self.title_vectorizer.transform(title)
+        return
 
     def vectorize_abstract(self):
         abstract = self.abstract
         if self.use_stem:
             abstract = self.stem_text(abstract)
         self.abstract_vector = self.abstract_vectorizer.transform(abstract)
+        return
 
     def vectorize_claims(self):
         claims = self.claims
         if self.use_stem:
             claims = self.stem_text(claims)
         self.claims_vector = self.claims_vectorizer.transform(claims)
+        return
 
     def find_similarity(self):
         self.similarity_title = linear_kernel(self.title_vector,
@@ -122,6 +167,7 @@ class PatentMatcher(object):
                 self.database_abstract_vectors).flatten()
         self.similarity_claims = linear_kernel(self.claims_vector,
                 self.database_claims_vectors).flatten()
+        return
 
     def recommend(self, k=20):
         '''

@@ -1,8 +1,4 @@
-from sklearn.feature_extraction.text import TfidfVectorizer
-import pandas as pd
 import cPickle as pkl
-from nltk.stem.snowball import SnowballStemmer
-import re
 from patent_tokenizer import PatentTokenizer
 
 def main():
