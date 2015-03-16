@@ -34,18 +34,20 @@ then go to all the individual patent pages. from that page scrape the 'filling d
 then store all that iinformation into database 'database_core'
 
 *2) filename:  get_data_maintenance.py
-''' INPUT: maintenancefee.txt
+```
+INPUT: maintenancefee.txt
 	OUTPUT: Patent maintenance database file -> ./my_database/database_maintenance
 	POINTS TO: combine_my_data.py
-'''
+```
 Purpose: parse maintenancefee.txt, get maintenance action records for each patent
 then store all that information into database 'database_maintenance'
 
 *3) filename:  get_data_assignment.py
-''' INPUT: None
+```
+	INPUT: None
 	OUTPUT: Patent assignment database file -> ./my_database/database_assignment
 	POINTS TO: cobine_my_data.py
-'''
+```
 Purpose: download all patent assignment data of individual patent from webstie: 'http://assignment.uspto.gov/'
 then store all that iinformation into database 'database_assignment'
 
@@ -53,10 +55,11 @@ then store all that iinformation into database 'database_assignment'
 Phase 2: combine my database
 =======================================
 filename: combine_my_database.py
-''' INPUT: None
+```
+	INPUT: None
 	OUTPUT: Patent assignment database file -> ./my_database/full_database
 	POINTS TO: get_query.py, [*populate_features.py, *calc_life_and_cost.py]
-'''
+```
 output file: _database.py
 type: sql or *mongo
 why:  store patent info given from get_data_core.py + get_data_assignment + get_data_maintenance.py
@@ -67,33 +70,37 @@ how: use psycopg to create new database called full_database.db.
 Phase 3: populate data
 =======================================
 1) filename: get_reference_data.py
-''' INPUT: full_database
+```
+	INPUT: full_database
 	OUTPUT: reference relation database -> ./my_database/citation_database
 	POINTS TO: get_reference_relations.py
-'''
+```
 why: store patent citation data
 how: use pandas to create new database called citation_database, which includes patent# and patent citations.
 
 *2) filename: populate_features.py
-''' INPUT: full_database
+```
+	INPUT: full_database
 	OUTPUT: reference relation database -> ./my_database/features_database
 	POINTS TO: build_model.py
-'''
+```
 
 *3) filename: calc_life_and_cost.py
-''' INPUT: full_database
+```
+	INPUT: full_database
 	OUTPUT: reference relation database -> ./my_database/life_cost_database
 	POINTS TO: build_regression_model.py
-'''
+```
 
 
 Phase 4: get working data
 =======================================
 1) filename: get_reference_relations.py
-''' INPUT: citation_database
+```
+	INPUT: citation_database
 	OUTPUT: citation relation file -> ./my_data/citation.csv
 	POINTS TO: calc_pagerank.py
-'''
+```
 why: get rows of one-to-one citation relation
 how: use pandas pivot_table 
 
@@ -101,40 +108,47 @@ how: use pandas pivot_table
 Phase 5: build model
 =======================================
 1) filename: calc_pagerank.py
-''' INPUT: citation_database.csv
+```
+	INPUT: citation_database.csv
 	OUTPUT: table_pagerank
 	POINTS TO: viz_pagerank.py
-'''
+```
+
 why: calculate pagerank
 how: use graphlab to calculate
 
-*2) filename: build_regression_model.py
-''' INPUT: 
+*2) filename: patent_life_predictor.py
+```
+	INPUT: 
 	OUTPUT: 
 	POINTS TO: 
-'''
+```
 
-*3) filename: 
-''' INPUT: 
+*3) filename: patent_matcher.py
+```
+	INPUT: 
 	OUTPUT: 
 	POINTS TO: 
-'''
+```
 
 Phase 6: visualization
 =======================================
-''' INPUT: table_pagerank, citation.csv
-	OUTPUT: table, chart, graph, map
+```
+	INPUT: table_pagerank, citation.csv
+	OUTPUT: table, chart
 	POINTS TO: web app
-'''
+```
+
 What: graph, table, map
 How: use d3.js, plot.ly
 
 
 Phase7: web app
 =======================================
-''' INPUT: 
+```
+	INPUT: 
 	OUTPUT: 
-'''
+```
 
 # Code Structure
 

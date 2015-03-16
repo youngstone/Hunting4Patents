@@ -44,7 +44,7 @@ class PatentMatcher(object):
         '''
         fit the input data with the model
         '''
-        print 'fitting the model'
+        print "fitting the model..."
         self.initializer(title, abstract, claims)
 
         self.vectorize_title()
@@ -63,16 +63,17 @@ class PatentMatcher(object):
         return False if entry == '' or re.match(r'^\s*$', entry) else True
 
     def load_tokenizer_and_database(self):
-        print 'loading tokenizer'
+        print "Loading tokenizer..."
         # load the tokenizer
         with open('../data/patent_tokenizer.pkl', 'rb') as handle:
             patent_tokenizer = pkl.load(handle)
+        print "finished loading tokenizer..."
 
         self.title_vectorizer = patent_tokenizer.get_title_vectorizer()
         self.abstract_vectorizer = patent_tokenizer.get_abstract_vectorizer()
         self.claims_vectorizer = patent_tokenizer.get_claims_vectorizer()
 
-        print 'loading pre-calculated vectors'
+        print "loading pre-calculated vectors..."
         # load the vectors
         with open('../data/patent_title_vectors.pkl', 'rb') as handle:
             self.database_title_vectors = pkl.load(handle)
@@ -82,7 +83,7 @@ class PatentMatcher(object):
             self.database_claims_vectors = pkl.load(handle)
 
     def initializer(self, title, abstract, claims):
-        print 'initializing'
+        print "initializing..."
         self.title = [title]
         self.abstract = [abstract]
         self.claims = [claims]

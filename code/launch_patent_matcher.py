@@ -10,10 +10,15 @@ import graphlab as gl
 from patent_matcher import PatentMatcher
 
 
+def main():
+	print "Launching PatentMatcher..."
+	matcher = PatentMatcher()
+	matcher.load_tokenizer_and_database()
 
-matcher = PatentMatcher()
-matcher.load_tokenizer_and_database()
+	# save the matcher
+	print "Saving to pickle file..."
+	with open('../data/patent_matcher.pkl', 'wb') as handle:
+	    pkl.dump(matcher, handle)
 
-# save the matcher
-with open('../data/patent_matcher.pkl', 'wb') as handle:
-    pkl.dump(matcher, handle)
+if __name__ == '__main__':
+	main()
