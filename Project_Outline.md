@@ -1,3 +1,4 @@
+'''
 -- CAPSTONE PROJECT/
 |	|-- CODE/
 |	|	|-- get_data_core.py => to scrape data and store (main data, title, text, etc)
@@ -16,16 +17,7 @@
 |	|	|-- scape --> patent_info.db
 |	|	|-- scape --> patent_info.db
 |	|	|-- scape --> patent_info.db
-
-
-
-http://www.freepatentsonline.com/result.html?p=1&edit_alert=&srch=xprtsrch&query_txt=ABST%2Fdream&uspat=on&date_range=all&stemming=on&sort=relevance&search=Search
-
-http://www.freepatentsonline.com/result.html?p=1&edit_alert=&srch=xprtsrch&query_txt=ABST%2Fdream+ACLM%2Fhas+AS%2FNY&uspat=on&date_range=all&stemming=on&sort=relevance&search=Search
-
-http://www.freepatentsonline.com/result.html?p=1&edit_alert=&srch=xprtsrch&query_txt=ABST%2Fdream+%0D%0A&uspat=on&date_range=all&stemming=on&sort=relevance&search=Search
-
-http://www.freepatentsonline.com/result.html?p=2&srch=xprtsrch&query_txt=ABST%2Fdream&uspat=on&date_range=all&stemming=on&sort=relevance
+'''
 
 
 
