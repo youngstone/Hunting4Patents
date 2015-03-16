@@ -1,54 +1,32 @@
-'''
--- CAPSTONE PROJECT/
-|	|-- CODE/
-|	|	|-- get_data_core.py => to scrape data and store (main data, title, text, etc)
-|	|	|-- get_data_maintenance.py => to import data (maintenance fee)
-|	|	|-- get_data_transaction.py => to import transaction records
-|	|	|-- -- feature_extraction.py
-|	|	|-- -- calculate_expiration_date.py
-|	|	|-- -- -- life_events.py
-|	|	|-- -- -- citation_flow.py
-|	|	|-- -- -- citation_graph.gephi
-|	|	|-- -- -- similarity.graphlab
-|	|	|-- -- -- -- data_viz.py
-|	|	|-- -- -- -- web_app.py
-|	|-- DATA/
-|	|	|-- maintenance.txt --> maintenance.db
-|	|	|-- scape --> patent_info.db
-|	|	|-- scape --> patent_info.db
-|	|	|-- scape --> patent_info.db
-'''
+# Models
 
+1. Search Engine
+	- Natural Language Processing
+	- TF-IDF
+	- Text similarity
 
+2. Recommender
+	- Ranking by PageRank
+		* all-time citation 
 
-1. Extract feature to predict the longevity of a patent (life expectancy)
-	- Features: semantic analysis, owner, law firm, post issuance cost (maintenance fee)  category, litigation, transaction records
-	similar to fraud detection case study
+3. Extract feature to predict the longevity of a patent (life expectancy)
+	- Features: semantic analysis, owner, law firm, post issuance cost (citation)  category, litigation, transaction records
+		* Random Forrest
 		* Logistic regression
 		* SVM, SVD
-		* Natural Language Processing
-2. Recommender
-	- Factors: post issuance cost (maintenance fee), closeness to predicted expiration, importance (by PageRank), 
-		* A priotized list to monitor patents
-		* adjustable weight to factors
 
 
-
-
-
-
-
-
-
+# Workflow
 
 Phase 1: get data
 =======================================
 
 1) filename:  get_data_core.py
-''' INPUT: None
+```
+	INPUT: None
 	OUTPUT: Patent database file -> ./my_database/database_core
 	POINTS TO: combine_my_data.py
-'''
+```
 Purpose: download all patent data from patent topics "Drugs / Vasodialators / Gene Therapy / Other Drug Related" from webstie: 'freepatentsonline'
 How: using bs4 + requests, or import.io
 Go to the pages that have all of the industry patents, get all the patent numbers.
@@ -158,6 +136,28 @@ Phase7: web app
 	OUTPUT: 
 '''
 
+# Code Structure
+
+```
+-- CAPSTONE PROJECT/
+|	|-- CODE/
+|	|	|-- get_data_core.py => to scrape data and store (main data, title, text, etc)
+|	|	|-- get_data_maintenance.py => to import data (maintenance fee)
+|	|	|-- get_data_transaction.py => to import transaction records
+|	|	|-- -- feature_extraction.py
+|	|	|-- -- calculate_expiration_date.py
+|	|	|-- -- -- life_events.py
+|	|	|-- -- -- citation_flow.py
+|	|	|-- -- -- citation_graph.gephi
+|	|	|-- -- -- similarity.graphlab
+|	|	|-- -- -- -- data_viz.py
+|	|	|-- -- -- -- web_app.py
+|	|-- DATA/
+|	|	|-- maintenance.txt --> maintenance.db
+|	|	|-- scape --> patent_info.db
+|	|	|-- scape --> patent_info.db
+|	|	|-- scape --> patent_info.db
+```
 
 
 

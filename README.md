@@ -2,4 +2,6 @@
 
 Huting4Patents is a tool that finds patents that are valuable but likely to expire early.
 
-[Project Outline](Project_Outline.md)
+[Project Proposal](Project_Outline.md)
+
+[Project Outline](Capstone_Project_Proposal-Stone.md)
