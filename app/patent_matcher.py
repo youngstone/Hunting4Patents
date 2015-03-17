@@ -65,7 +65,7 @@ class PatentMatcher(object):
 
         print "Launching PatentTokenizer..."
         patent_tokenizer = PatentTokenizer()
-        patent_tokenizer.set_df('../data/patent_text_df.pkl')
+        patent_tokenizer.set_df('datafile/patent_text_df.pkl')
 
         print "Loading dataframe..."
         patent_tokenizer.set_vectors()

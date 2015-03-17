@@ -1,3 +1,5 @@
+*.pem
+*.cer
 *.pyc
 .idea
 .ipynb_checkpoints

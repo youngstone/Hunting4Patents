@@ -76,6 +76,7 @@ def index_hover_table():
 
 @app.route('/table2', methods=['POST'])
 def index_hover_table2():
+    print 'hi'
     title = request.form.get('title', None)
     abstract = request.form.get('abstract', None)
     claims = request.form.get('claims', None)
@@ -93,7 +94,7 @@ def index_hover_table2():
     # for d in citation_data:
     #     url = plot_count(d)
     #     citation_plot_url.append(url)
-
+    print 'now', df_filtered.shape
     plot_url = plot(df_filtered, scores)
     print plot_url
 
@@ -121,7 +122,7 @@ def index_hover_table2():
 
     url = 'https://www.google.com/patents/'
     link = df_filtered['Patent Number'].apply(lambda x: url + 'US' + x)
-    
+
     x = zip(pat_id, sim, pr, expire_day, time_to_expire, link)
 
     return render_template('my_table2.html', data=x, plot_url=plot_url)
@@ -133,4 +134,4 @@ if __name__ == '__main__':
     app.df = run_on_start_2()
     print "Preloading completed."
     print "Enjoy."
-    app.run(host='0.0.0.0', port=7878, debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)
