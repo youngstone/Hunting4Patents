@@ -39,7 +39,7 @@ def run_on_start_2():
 # ============================================
 @app.route('/')
 def welcome():
-    return render_template('query2.html')
+    return render_template('query.html')
 
 
 # @app.route('/blog')
@@ -47,35 +47,35 @@ def welcome():
 #     return render_template('blog.html')
 
 
+# @app.route('/table', methods=['POST'])
+# def index_hover_table():
+#     title = request.form.get('title', None)
+#     abstract = request.form.get('abstract', None)
+#     claims = request.form.get('claims', None)
+
+#     # Fit the query
+#     app.matcher.fit(title, abstract, claims)
+#     patents, scores = app.matcher.recommendations, app.matcher.similarity_scores
+
+#     df = pd.read_csv('datafile/selected_patent.csv', index_col=None)
+
+#     df_filtered = df.iloc[patents]
+
+#     pat = df_filtered['Patent Number'].values
+#     sim = scores
+#     pr = df_filtered['PageRank'].values
+#     expire_day = df_filtered['Default Expire Day'].values
+#     time_to_expire = df_filtered['Time to Expire'].values
+#     # url = 'http://www.freepatentsonline.com/'
+#     # link = df['Patent Number'].apply(lambda x: url + x +'.html')
+#     url = 'https://www.google.com/patents/'
+#     link = df_filtered['Patent Number'].apply(lambda x: url + 'US' + x)
+#     x = zip(pat, sim, pr, expire_day, time_to_expire, link)
+#     return render_template('my_table.html', data=x)
+
+
 @app.route('/table', methods=['POST'])
 def index_hover_table():
-    title = request.form.get('title', None)
-    abstract = request.form.get('abstract', None)
-    claims = request.form.get('claims', None)
-
-    # Fit the query
-    app.matcher.fit(title, abstract, claims)
-    patents, scores = app.matcher.recommendations, app.matcher.similarity_scores
-
-    df = pd.read_csv('datafile/selected_patent.csv', index_col=None)
-
-    df_filtered = df.iloc[patents]
-
-    pat = df_filtered['Patent Number'].values
-    sim = scores
-    pr = df_filtered['PageRank'].values
-    expire_day = df_filtered['Default Expire Day'].values
-    time_to_expire = df_filtered['Time to Expire'].values
-    # url = 'http://www.freepatentsonline.com/'
-    # link = df['Patent Number'].apply(lambda x: url + x +'.html')
-    url = 'https://www.google.com/patents/'
-    link = df_filtered['Patent Number'].apply(lambda x: url + 'US' + x)
-    x = zip(pat, sim, pr, expire_day, time_to_expire, link)
-    return render_template('my_table.html', data=x)
-
-
-@app.route('/table2', methods=['POST'])
-def index_hover_table2():
     print 'hi'
     title = request.form.get('title', None)
     abstract = request.form.get('abstract', None)
@@ -85,9 +85,9 @@ def index_hover_table2():
     app.matcher.fit(title, abstract, claims)
     patents, scores = app.matcher.recommendations, app.matcher.similarity_scores
 
-    df = pd.read_pickle('datafile/patent_dataframe.pkl')
+    # df = pd.read_pickle('datafile/patent_dataframe.pkl')
 
-    df_filtered = df.iloc[patents]
+    df_filtered = app.df.iloc[patents]
 
     citation_data = df_filtered['forward-citations_count']
     citation_plot_url = []
@@ -99,15 +99,10 @@ def index_hover_table2():
     print plot_url
 
     pat_id = df_filtered['Patent Number'].values
-
     tit = df_filtered['Title'].values
-
     cls = [c[0] for c in df_filtered['Primary Class'].values]
-
     text = ['US' + i + '<br>' + t + '<br>' + c for i, t, c in zip(pat_id, tit, cls)]
-
     gyear = np.array([int(str(x)[:4]) for x in df_filtered['Filing Date'].values])
-
     pr = df_filtered['PageRank'].values
     pr = pr / pr.max() 
 
@@ -125,7 +120,7 @@ def index_hover_table2():
 
     x = zip(pat_id, sim, pr, expire_day, time_to_expire, link)
 
-    return render_template('my_table2.html', data=x, plot_url=plot_url)
+    return render_template('my_table.html', data=x, plot_url=plot_url)
 
 
 

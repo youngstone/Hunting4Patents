@@ -5,24 +5,19 @@ import cPickle as pkl
 import json
 from collections import Counter
 from datetime import datetime, date
-
 from sklearn.cross_validation import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import confusion_matrix, precision_score, recall_score
+from sklearn.metrics import confusion_matrix, precision_score, \
+                            recall_score, f1_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.grid_search import GridSearchCV
-
-
 from sklearn.feature_extraction.text import TfidfVectorizer
-import pandas as pd
-import cPickle as pkl
 from nltk.stem.snowball import SnowballStemmer
 import re
 from patent_tokenizer import PatentTokenizer
-
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 from scipy import interp
@@ -113,7 +108,7 @@ class PatentLongevityPredictor(object):
         self.df_test = None
         self.train_features = None
         self.train_target = None
-
+        self.patent_status = None
         self.features = None
         self.target = None
         self.predict_model = None
@@ -121,6 +116,7 @@ class PatentLongevityPredictor(object):
         self.test_prediction = None
         self.patent_tokenizer = None
         self.patent_vectors = None
+        self.predicted_status = None
 
     def initialization(self, df_input):
         print "initializing PatentLongevityPredictor..."
@@ -163,6 +159,32 @@ class PatentLongevityPredictor(object):
         self.prediction = y_predict
         print "predictions:"
         print y_predict
+
+        print "=========="
+        print type(self.patent_status.values), self.patent_status.values.shape
+        print type(self.prediction), self.prediction.shape
+
+        df_result = self.df
+
+        a = []
+
+        for fact, pred in zip(self.patent_status.values, self.prediction):
+            if fact == 0:
+                a.append('Naturally Expired')
+            if fact == 1:
+                a.append('Early Expired')
+            if fact == -1:
+                if pred == 1:
+                    a.append('Predicted Yes')
+                elif pred == 0:
+                    a.append('Predicted No')
+        
+        predicted_events = pd.Series(data=a)
+
+        df_result['Expiration Prediction'] = predicted_events
+        df_result = df_result[['Patent Number', 'Expiration Prediction']]
+        df_result.to_pickle('../data/patent_prediction.pkl')
+
         return
 
     def transform(self, df):
@@ -193,8 +215,8 @@ class PatentLongevityPredictor(object):
         for d, e in zip(fil_dat, cod):
             end.append(determine_early_termination(d, e))
 
-        patent_status = pd.Series(data=end)
-        df['Patent Status'] = patent_status
+        self.patent_status = pd.Series(data=end)
+        df['Patent Status'] = self.patent_status
         
         feature_names = [u'Patent Number',
                          u'Title', 
@@ -240,6 +262,8 @@ class PatentLongevityPredictor(object):
                                  df['bwd_cit_ratio_inv_exm'].fillna(float(1))
 
         df['bwd_pat_cit_count'] = df['backward-citations'].apply(len)
+        # df['fwd_pat_cit_count'] = df['forward-citations'].apply(len)
+
         # df['bwd_pat_cit_count'] = df['backward-citations'].apply(lambda x: \
         #                             0 if type(x) == float else len(x))
         df['Primary Class'] = df['Primary Class'].apply(lambda x: x[0])
@@ -287,7 +311,6 @@ class PatentLongevityPredictor(object):
 
         self.patent_tokenizer = patent_claims_vectorizer
         self.patent_vectors = patent_claims_vectors
-
 
         claims_features_name = patent_claims_vectorizer.get_feature_names()
 
@@ -348,7 +371,7 @@ class PatentLongevityPredictor(object):
                         scoring='mean_squared_error').fit(X_train, y_train)
         return grid_cv
 
-    def plot_result(self):
+    def print_result(self):
         rf_best = self.predict_model
         X_test = self.train_features
         y_test = self.train_target
@@ -358,6 +381,7 @@ class PatentLongevityPredictor(object):
         print confusion_matrix(y_test, y_predict)
         print "precision:", precision_score(y_test, y_predict)
         print "recall:", recall_score(y_test, y_predict)
+        print "f1-score:", f1_score(y_test, y_predict)
         return
 
 
@@ -370,7 +394,7 @@ if __name__ == '__main__':
 
     plr = PatentLongevityPredictor()
     plr.initialization(df_input)
-    plr.plot_result()
+    plr.print_result()
     plr.predict()
 
 
