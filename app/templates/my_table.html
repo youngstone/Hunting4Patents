@@ -67,17 +67,20 @@ body { font-size: 140%; }
                 <th>Similarity</th>
                 <th>PageRank</th>
                 <th>Default Expire Day</th>
-                <th>Time to Expire</th>
+                <th>Default Time to Expire</th>
+                <th>Expiration Prediction</th>
             </tr>
         </thead>
         <tbody>
-            {% for pat, sim, pr, expire_day, time_to_expire, link in data %}
+            {% for pat, sim, pr, expire_day, time_to_expire, link, pred in data %}
             <tr>
                 <td><a href={{ link }}> {{ pat }} </a></td>
                 <td>{{ sim }}</td>
                 <td>{{ pr }}</td>
                 <td>{{ expire_day }}</td>
                 <td>{{ time_to_expire }}</td>
+                <td>{{ pred }}</td>
+
             </tr>
             {% endfor %}
         </tbody>

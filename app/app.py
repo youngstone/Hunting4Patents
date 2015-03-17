@@ -16,20 +16,17 @@ app = Flask(__name__)
 
 def run_on_start_1():
     print "loading patent_matcher..."
-
     matcher = PatentMatcher()
     matcher.calc_tokenizer_and_vectors()
-
-    # # load from pickled file
-    # with open('../data/patent_matcher.pkl', 'rb') as handle:
-    #     matcher = pkl.load(handle)
-
     return matcher
 
 def run_on_start_2():
     print "loading dataframe..."
     with open('datafile/patent_dataframe.pkl', 'rb') as handle:
-        df = pkl.load(handle)
+        df_1 = pkl.load(handle)
+    with open('datafile/patent_prediction.pkl', 'rb') as handle:
+        df_2 = pkl.load(handle)
+    df = pd.merge(df_1, df_2, on='Patent Number', how='inner')
     print "dateframe loaded."
     return df
 
@@ -85,28 +82,23 @@ def index_hover_table():
     app.matcher.fit(title, abstract, claims)
     patents, scores = app.matcher.recommendations, app.matcher.similarity_scores
 
-    # df = pd.read_pickle('datafile/patent_dataframe.pkl')
-
     df_filtered = app.df.iloc[patents]
 
     citation_data = df_filtered['forward-citations_count']
     citation_plot_url = []
-    # for d in citation_data:
-    #     url = plot_count(d)
-    #     citation_plot_url.append(url)
-    print 'now', df_filtered.shape
+
     plot_url = plot(df_filtered, scores)
     print plot_url
 
-    pat_id = df_filtered['Patent Number'].values
-    tit = df_filtered['Title'].values
-    cls = [c[0] for c in df_filtered['Primary Class'].values]
-    text = ['US' + i + '<br>' + t + '<br>' + c for i, t, c in zip(pat_id, tit, cls)]
-    gyear = np.array([int(str(x)[:4]) for x in df_filtered['Filing Date'].values])
-    pr = df_filtered['PageRank'].values
-    pr = pr / pr.max() 
+    # pat_id = df_filtered['Patent Number'].values
+    # tit = df_filtered['Title'].values
+    # cls = [c[0] for c in df_filtered['Primary Class'].values]
+    # text = ['US' + i + '<br>' + t + '<br>' + c for i, t, c in zip(pat_id, tit, cls)]
+    # gyear = np.array([int(str(x)[:4]) for x in df_filtered['Filing Date'].values])
+    # pr = df_filtered['PageRank'].values
+    # pr = pr / pr.max() 
 
-    sim = scores
+    # sim = scores
 
 
     pat = df_filtered['Patent Number'].values
@@ -114,11 +106,12 @@ def index_hover_table():
     pr = df_filtered['PageRank'].values
     expire_day = df_filtered['Default Expire Day'].values
     time_to_expire = df_filtered['Time to Expire'].values
+    pred = df_filtered['Expiration Prediction'].values
 
     url = 'https://www.google.com/patents/'
     link = df_filtered['Patent Number'].apply(lambda x: url + 'US' + x)
 
-    x = zip(pat_id, sim, pr, expire_day, time_to_expire, link)
+    x = zip(pat, sim, pr, expire_day, time_to_expire, link, pred)
 
     return render_template('my_table.html', data=x, plot_url=plot_url)
 
