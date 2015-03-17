@@ -33,7 +33,7 @@ class PatentTokenizer(object):
         sub2 = re.sub(r'[)(!?}{:;,\.\[\]]', '', sub1)
         sub3 = re.sub(r'\b\d+\b', ' ', sub2)
         stemmed = lambda doc: \
-                        ' '.join(snowball.stem(word) for word in doc.split())
+            ' '.join(snowball.stem(word) for word in doc.split())
         return stemmed(sub3)
 
     def set_vectors(self):

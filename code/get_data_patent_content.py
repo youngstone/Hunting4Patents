@@ -199,14 +199,6 @@ def get_patent_content(patent_numbers, patent_links):
             patent_content[u'Number'] = patent_numbers[num]
             patent_content[u'Title'] = raw_dict.get(u'Title', None)
             patent_content[u'Abstract'] = raw_dict.get(u'Abstract', None)
-
-            # date = raw_dict.get('Filing Date', None)
-            # date = parse(date)
-            # print date
-            # date = date.strftime('%m/%d/%Y')
-            # print date
-            # patent_content['Filing Date'] = date
-
             patent_content[u'Filing Date'] = \
                 raw_dict.get(u'Filing Date', None)
             patent_content[u'Primary Class'] = \

@@ -48,13 +48,12 @@ def get_patent_status(patent_numbers, patent_links):
 
     tab_features = ['Patent Number',
                     'Publication number',
-					'Publication type',
-					'Application number',
-					'Publication date',
-					'Filing date',
-					'Priority date',
-					'Fee status']
-
+                    'Publication type',
+                    'Application number',
+                    'Publication date',
+                    'Filing date',
+                    'Priority date',
+                    'Fee status']
 
     a = 0
 
@@ -66,9 +65,8 @@ def get_patent_status(patent_numbers, patent_links):
 
         response = requests.get(url)
         if response.status_code == 200:
-            if num % 100 ==0:
-                print num
-            # print url
+            if num % 100 == 0:
+                print "progres: %s patents fetched..." % num
 
             html = response.content
             soup = BeautifulSoup(html, 'html.parser')
@@ -93,10 +91,5 @@ def get_patent_status(patent_numbers, patent_links):
     print collection.find_one()
 
 
-
 if __name__ == '__main__':
-	main()
-
-
-
-
+    main()

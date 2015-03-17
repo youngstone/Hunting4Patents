@@ -62,8 +62,6 @@ def get_patent_citation(patent_numbers, patent_links):
                     'classifications',
                     'legal-events']
 
-    a = 0
-
     for num, link in enumerate(patent_links):
 
         url = link
@@ -72,7 +70,7 @@ def get_patent_citation(patent_numbers, patent_links):
 
         response = requests.get(url)
         if response.status_code == 200:
-            if num % 100 ==0:
+            if num % 100 == 0:
                 print num
             # print url
 
@@ -90,29 +88,28 @@ def get_patent_citation(patent_numbers, patent_links):
                 if head is not None and body is not None:
                     print head.get_text(), body.get_text()
 
-
             tab_content = soup.find_all('div',
-                                class_='patent-section patent-tabular-section')
+                          class_='patent-section patent-tabular-section')
 
             for con in tab_content:
                 subject = con.find('a')['id']
                 if subject == 'backward-citations':
-                    rows = con.find_all('tr') 
+                    rows = con.find_all('tr')
                     patent_tab_features['backward-citations'] = []
                     for row in rows[1:]:
                         patent_tab_features['backward-citations'].append(
-                            {x.text : y.text for x, y in zip(rows[0], row)} )
-                        
+                            {x.text: y.text for x, y in zip(rows[0], row)})
+
                 elif subject == 'npl-citations':
-                    rows = con.find_all('tr') 
+                    rows = con.find_all('tr')
                     patent_tab_features['npl-citations'] = len(rows) - 1
 
                 elif subject == 'forward-citations':
-                    rows = con.find_all('tr') 
+                    rows = con.find_all('tr')
                     patent_tab_features['forward-citations'] = []
                     for row in rows[1:]:
                         patent_tab_features['forward-citations'].append(
-                            {x.text : y.text for x, y in zip(rows[0], row)} )
+                            {x.text: y.text for x, y in zip(rows[0], row)})
 
                 elif subject == 'classifications':
                     pass
@@ -123,7 +120,7 @@ def get_patent_citation(patent_numbers, patent_links):
                     patent_tab_features['legal-events'] = []
                     for row in rows[1:]:
                         patent_tab_features['legal-events'].append(
-                            {x.text: y.text for x, y in zip(rows[0], row)} )
+                            {x.text: y.text for x, y in zip(rows[0], row)})
 
         try:
             collection.insert(patent_tab_features)

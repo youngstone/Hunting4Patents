@@ -136,7 +136,7 @@ class PatentMatcher(object):
         sub2 = re.sub(r'[)(!?}{:;,\.\[\]]', '', sub1)
         sub3 = re.sub(r'\b\d+\b', ' ', sub2)
         stemmed = lambda doc: \
-                        ' '.join(snowball.stem(word) for word in doc.split())
+            ' '.join(snowball.stem(word) for word in doc.split())
         return stemmed(sub3)
 
     def vectorize_title(self):
@@ -161,12 +161,15 @@ class PatentMatcher(object):
         return
 
     def find_similarity(self):
-        self.similarity_title = linear_kernel(self.title_vector,
-                self.database_title_vectors).flatten()
-        self.similarity_abstract = linear_kernel(self.abstract_vector,
-                self.database_abstract_vectors).flatten()
-        self.similarity_claims = linear_kernel(self.claims_vector,
-                self.database_claims_vectors).flatten()
+        self.similarity_title = \
+            linear_kernel(self.title_vector,
+                          self.database_title_vectors).flatten()
+        self.similarity_abstract = \
+            linear_kernel(self.abstract_vector,
+                          self.database_abstract_vectors).flatten()
+        self.similarity_claims = \
+            linear_kernel(self.claims_vector,
+                          self.database_claims_vectors).flatten()
         return
 
     def recommend(self, k=20):
@@ -179,10 +182,10 @@ class PatentMatcher(object):
         tag_claims = 1 if self.not_empty_entry(self.claims[0]) else 0
 
         if (tag_title + tag_abstract + tag_claims) > 0:
-            total_similarity_score = (self.similarity_title * 1.0 + \
-                self.similarity_abstract * 1.0 + \
-                self.similarity_claims * 1.0) / \
-                (tag_title + tag_abstract + tag_claims)
+            total_similarity_score = (self.similarity_title * 1.0 +
+                                      self.similarity_abstract * 1.0 +
+                                      self.similarity_claims * 1.0) / \
+                                      (tag_title + tag_abstract + tag_claims)
             top_match = np.argsort(total_similarity_score)[:-k:-1]
             self.recommendations = top_match
             self.similarity_scores = total_similarity_score[top_match]
