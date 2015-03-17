@@ -6,7 +6,7 @@
 *.bak
 *.swp
 *.json
-*.pkl
+data/*.pkl
 *.txt
 MaintFeeEvents*
 reference_code*
