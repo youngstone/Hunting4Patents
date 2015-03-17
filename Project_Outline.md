@@ -2,18 +2,15 @@
 
 1. Search Engine
 	- Natural Language Processing
-	- TF-IDF
-	- Text similarity
+	- Similarity score weighted by title, abstract, and claims
 
-2. Recommender
-	- Ranking by PageRank
-		* all-time citation 
+2. Ranking
+	- PageRank
+		* all-time citations
 
-3. Extract feature to predict the longevity of a patent (life expectancy)
-	- Features: semantic analysis, owner, law firm, post issuance cost (citation)  category, litigation, transaction records
+3. Extract features to predict the early expiration of a patent
+	- Features: backward patent citations, backward non-patent citaitons, ratio of backward citations made by inventor to made by patent examiner, semantic analysis, post issuance records
 		* Random Forrest
-		* Logistic regression
-		* SVM, SVD
 
 
 # Workflow
@@ -107,6 +104,9 @@ how: use pandas pivot_table
 
 Phase 5: build model
 =======================================
+Model 1: pagerank
+---------------------------------------
+
 1) filename: calc_pagerank.py
 ```
 	INPUT: citation_database.csv
@@ -117,14 +117,19 @@ Phase 5: build model
 why: calculate pagerank
 how: use graphlab to calculate
 
-*2) filename: patent_life_predictor.py
+
+Model 2: early expiration predictor
+---------------------------------------
+2) filename: patent_life_predictor.py
 ```
 	INPUT: 
 	OUTPUT: 
 	POINTS TO: 
 ```
 
-*3) filename: patent_matcher.py
+Model 3: similarity
+---------------------------------------
+3) filename: patent_matcher.py
 ```
 	INPUT: 
 	OUTPUT: 
@@ -134,13 +139,13 @@ how: use graphlab to calculate
 Phase 6: visualization
 =======================================
 ```
-	INPUT: table_pagerank, citation.csv
+	INPUT: patent_dataframe.pkl
 	OUTPUT: table, chart
 	POINTS TO: web app
 ```
 
-What: graph, table, map
-How: use d3.js, plot.ly
+What: graph, table
+How: use plot.ly
 
 
 Phase7: web app
@@ -153,7 +158,7 @@ Phase7: web app
 # Code Structure
 
 ```
--- CAPSTONE PROJECT/
+-- HUNTING4PATENTS/
 |	|-- CODE/
 |	|	|-- get_data_core.py => to scrape data and store (main data, title, text, etc)
 |	|	|-- get_data_maintenance.py => to import data (maintenance fee)

@@ -14,11 +14,13 @@ from my_plot_plotly import *
 
 app = Flask(__name__)
 
+
 def run_on_start_1():
     print "loading patent_matcher..."
     matcher = PatentMatcher()
     matcher.calc_tokenizer_and_vectors()
     return matcher
+
 
 def run_on_start_2():
     print "loading dataframe..."
@@ -31,46 +33,15 @@ def run_on_start_2():
     return df
 
 
-
-# OUR HOME PAGE
+# THE HOME PAGE - Query
 # ============================================
 @app.route('/')
 def welcome():
     return render_template('query.html')
 
 
-# @app.route('/blog')
-# def blog():
-#     return render_template('blog.html')
-
-
-# @app.route('/table', methods=['POST'])
-# def index_hover_table():
-#     title = request.form.get('title', None)
-#     abstract = request.form.get('abstract', None)
-#     claims = request.form.get('claims', None)
-
-#     # Fit the query
-#     app.matcher.fit(title, abstract, claims)
-#     patents, scores = app.matcher.recommendations, app.matcher.similarity_scores
-
-#     df = pd.read_csv('datafile/selected_patent.csv', index_col=None)
-
-#     df_filtered = df.iloc[patents]
-
-#     pat = df_filtered['Patent Number'].values
-#     sim = scores
-#     pr = df_filtered['PageRank'].values
-#     expire_day = df_filtered['Default Expire Day'].values
-#     time_to_expire = df_filtered['Time to Expire'].values
-#     # url = 'http://www.freepatentsonline.com/'
-#     # link = df['Patent Number'].apply(lambda x: url + x +'.html')
-#     url = 'https://www.google.com/patents/'
-#     link = df_filtered['Patent Number'].apply(lambda x: url + 'US' + x)
-#     x = zip(pat, sim, pr, expire_day, time_to_expire, link)
-#     return render_template('my_table.html', data=x)
-
-
+# THE RESPONSE PAGE - Query Result
+# ============================================
 @app.route('/table', methods=['POST'])
 def index_hover_table():
     print 'hi'
@@ -80,26 +51,18 @@ def index_hover_table():
 
     # Fit the query
     app.matcher.fit(title, abstract, claims)
-    patents, scores = app.matcher.recommendations, app.matcher.similarity_scores
-
+    patents = app.matcher.recommendations
+    scores = app.matcher.similarity_scores
     df_filtered = app.df.iloc[patents]
+
+    if df_filtered.shape[0] == 0:
+        return render_template('my_table.html')
 
     citation_data = df_filtered['forward-citations_count']
     citation_plot_url = []
 
     plot_url = plot(df_filtered, scores)
     print plot_url
-
-    # pat_id = df_filtered['Patent Number'].values
-    # tit = df_filtered['Title'].values
-    # cls = [c[0] for c in df_filtered['Primary Class'].values]
-    # text = ['US' + i + '<br>' + t + '<br>' + c for i, t, c in zip(pat_id, tit, cls)]
-    # gyear = np.array([int(str(x)[:4]) for x in df_filtered['Filing Date'].values])
-    # pr = df_filtered['PageRank'].values
-    # pr = pr / pr.max() 
-
-    # sim = scores
-
 
     pat = df_filtered['Patent Number'].values
     sim = scores
@@ -114,7 +77,6 @@ def index_hover_table():
     x = zip(pat, sim, pr, expire_day, time_to_expire, link, pred)
 
     return render_template('my_table.html', data=x, plot_url=plot_url)
-
 
 
 if __name__ == '__main__':

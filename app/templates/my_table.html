@@ -67,7 +67,7 @@ body { font-size: 140%; }
                 <th>Similarity</th>
                 <th>PageRank</th>
                 <th>Default Expire Day</th>
-                <th>Default Time to Expire</th>
+                <!-- <th>Default Time to Expire</th> -->
                 <th>Expiration Prediction</th>
             </tr>
         </thead>
@@ -78,7 +78,7 @@ body { font-size: 140%; }
                 <td>{{ sim }}</td>
                 <td>{{ pr }}</td>
                 <td>{{ expire_day }}</td>
-                <td>{{ time_to_expire }}</td>
+                <!-- <td>{{ time_to_expire }}</td> -->
                 <td>{{ pred }}</td>
 
             </tr>
@@ -93,7 +93,6 @@ body { font-size: 140%; }
 <div align='middle'>
 <iframe width="800" height="600" frameborder="0" seamless="seamless" scrolling="no" src= {{ plot_url }} ></iframe>
 </div>
-
 
 
 <div id='chart'> <svg></svg></div>

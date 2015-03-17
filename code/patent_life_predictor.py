@@ -1,5 +1,7 @@
 import pandas as pd
+from pandas.core.reshape import get_dummies
 import numpy as np
+from scipy import interp
 import re
 import cPickle as pkl
 import json
@@ -16,14 +18,11 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.grid_search import GridSearchCV
 from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.stem.snowball import SnowballStemmer
-import re
 from patent_tokenizer import PatentTokenizer
-import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
-from scipy import interp
 from sklearn.cross_validation import KFold
 from sklearn.preprocessing import StandardScaler
-from pandas.core.reshape import get_dummies
+import matplotlib.pyplot as plt
 
 
 def plot_roc(X, y, clf_class, **kwargs):
@@ -197,23 +196,6 @@ class PatentLongevityPredictor(object):
     def transform(self, df):
         print "transforming input dataframe..."
 
-        # cond = df['Filing Date'].apply(lambda x: type(x)) == pd.tslib.NaTType
-        # df = df[~cond]
-        ###
-        # print df['Filing Date'].values[-10:]
-        # min_day = df['Filing Date'].min()
-        # print min_day
-        # print type(min_day)
-        # min_day = min_day.to_datetime()
-        # print min_day
-        # print type(min_day)
-        # print df.info()
-
-        # df['Filing Date'] = df['Filing Date'].apply(lambda x: \
-        #                     min_day if type(x) == pd.tslib.NaTType else x)
-        ###
-        print df['Filing Date'].values[-10:]
-
         cod = df['legal-events'].apply(get_code)
         dat = df['legal-events'].apply(get_date)
         fil_dat = df['Filing Date']
@@ -244,9 +226,6 @@ class PatentLongevityPredictor(object):
         df = df.rename(columns={'Patent Number': 'Number'})
 
         df['num_of_claims'] = df['Claims'].apply(len)
-
-        # df['num_of_claims'] = df['Claims'].apply(lambda x: \
-        #                             0 if type(x) == float else len(x))
 
         fwd_cit_ratio_inv_exm = []
         fwd_cit_inv = df['forward-citations-by-inventor']
