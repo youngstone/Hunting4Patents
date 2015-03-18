@@ -16,7 +16,7 @@ def color_generator(color_pool):
         yield i
 
 
-def plot(df_filtered, scores):
+def plot(df_plot, scores):
 
     color_pool = ["#A2692C", "#E147E7", "#4FADE4", "#3EC126", "#E43077",
                   "#448962", "#CB91DC", "#E54523", "#B5AF1B", "#716BEC",
@@ -48,12 +48,20 @@ def plot(df_filtered, scores):
 
     traces = []
 
+    print df_plot
+    print df_plot['Expiration Prediction']
+    print "@@@@@@@"
+
     for i, cat in enumerate(expire_types):
 
-        df_cat = df_filtered[df_filtered['Expiration Prediction'] == cat]
+        df_cat = df_plot[df_plot['Expiration Prediction'] == cat]
+
+        print cat
+        print df_cat
+        print "===="
 
         if df_cat.shape[0] == 0:
-            break
+            continue
 
         pat_id = df_cat['Patent Number'].values
         tit = df_cat['Title'].values

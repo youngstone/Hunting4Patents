@@ -55,13 +55,28 @@ def index_hover_table():
     scores = app.matcher.similarity_scores
     df_filtered = app.df.iloc[patents]
 
+    screening = pd.Series(data=scores) > 0.00000000000001
+    df_filtered['screening'] = screening
+
+    print screening
+    print df_filtered.head()
+    df_filtered = df_filtered.set_index()
+    df_filtered = df_filtered[df_filtered['screening'] == True ]
+    print df_filtered.head()
+
     if df_filtered.shape[0] == 0:
         return render_template('my_table.html')
 
     citation_data = df_filtered['forward-citations_count']
     citation_plot_url = []
 
-    plot_url = plot(df_filtered, scores)
+    df_plot = df_filtered[['Patent Number', 'Title', 'Filing Date', 'PageRank', 
+                          'Expiration Prediction', 'Primary Class']]
+
+    # print scores
+    # print df_plot
+    plot_url = plot(df_plot, scores)
+
     print plot_url
 
     pat = df_filtered['Patent Number'].values
@@ -71,8 +86,11 @@ def index_hover_table():
     time_to_expire = df_filtered['Time to Expire'].values
     pred = df_filtered['Expiration Prediction'].values
 
-    url = 'https://www.google.com/patents/'
-    link = df_filtered['Patent Number'].apply(lambda x: url + 'US' + x)
+    # url = 'https://www.google.com/patents/'
+    # link = df_filtered['Patent Number'].apply(lambda x: url + 'US' + x)
+
+    url = 'http://patft1.uspto.gov/netacgi/nph-Parser?patentnumber='
+    link = df_filtered['Patent Number'].apply(lambda x: url + x)
 
     x = zip(pat, sim, pr, expire_day, time_to_expire, link, pred)
 

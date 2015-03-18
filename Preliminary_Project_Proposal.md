@@ -1,6 +1,6 @@
 # Capstone Project Proposal
 
-Zidong Yang (Stone)
+Zidong Yang (Stone Young)
 
 02/23/2014
 
@@ -13,7 +13,9 @@ Since the public knowledge is not protectable and the trade secret is not known 
 
 Article One, section 8, clause 8 of the U.S. Constitution states:
 
-```The Congress shall have power ... To promote the progress of science and useful arts, by securing for limited times to authors and inventors the exclusive right to their respective writings and discoveries;```
+```
+The Congress shall have power ... To promote the progress of science and useful arts, by securing for limited times to authors and inventors the exclusive right to their respective writings and discoveries;
+```
 
 There are two aspects of the US patent law:
 

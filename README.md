@@ -2,29 +2,72 @@
 
 Huting4Patents is a tool that finds patents that are valuable but likely to expire early.
 
+I built a custom web scraper to get patent data from website and build a clean database. I calculated the pagerank for each patent based on all-time citations. I built a Random Forest model to predict early expiration by utilizing patent features during its early life. A patent search engine based on content similarity comparison is provided for user's query.
+
 [Live Web App](http://ec2-52-10-83-141.us-west-2.compute.amazonaws.com/) (Now available for pharmaceutical patents search)
 
 [Project Proposal](Preliminary_Project_Proposal.md)
 
 ![png](results/citation_network.png)
+(citation network of a collection of patents)
+
+# Incentive
+
+We are in a world of inventions. Making inventions and making use of the inventions are key to a company's success.
+
+US patent law grants the patent owner exclusive rights of the invention of 20 years. By granting the right to produce a new product without fear of competition, patents provide incentive for companies or individuals to continue developing innovative new products or services. 
+
+One example is that pharmaceutical companies spend large sums on research and development and patents are essential to earning a profit.
+
+On ther other hand, if you own a business and you want to make use of others' patents for your business, you may want to find a way to identify those patents that (1) are related to your business, (2) valuable, for example in terms of popularity, and (3) are like to expire soon.
+
+Therefore, the goal of this project to build a tool that calculates the metrics for these 3 needs and makes the best recommendations.
+
+
+# Data
+
+I scraped and downloaded patent data from the following website:
+
+* [Google Patent Search](http://www.google.com/patents)
+* [Freepatentonline](http://www.freepatentsonline.com)
+* [USPTO Patent Assignment Search](http://assignment.uspto.gov) 
+* [USPTO Patent Maintenance Fee Events](https://eipweb.uspto.gov/MaintFeeEvents/)
+* [Harvard Patent Network Dataverse](https://thedata.harvard.edu/dvn/dv/patent/faces/study/StudyPage.xhtml?globalId=hdl:1902.1/12367&studyListingIndex=0_b547d55c3b44eda0c6f7707020be)
+
+The initial implementation collected 2465 patents in the field of pharmaceutical industry. 
+
+# Features
+
+Features are the useful properties underlying the raw data. I extracted the following features to build my models
+
+* Patent text content
+	* --> convert to tf-idf vectors
+
+* Patent citation
+	* --> convert to connections between patents
+
+* Bibliographical information, maintenance events
+	* --> to be utilized by feature engineering
+
 
 # Models
 
-RELEVANCY
-VALUE
-WHEN TO EXPIRE
+The goal is to find 3 metrics of RELEVANCY, VALUE, WHEN TO EXPIRE, so I built a model for each aspect.
 
 1. Search Engine
-	- Natural Language Processing
-	- Similarity score weighted by title, abstract, and claims
+	- Tool: Natural Language Processing
+	- Features: tf-idf vectors
+	- How: calculate similarity score weighted by title, abstract, and claims
 
 2. Ranking
-	- PageRank
-		* all-time citations
+	- Tool: network and PageRank
+	- Features: all-time citations
+	- How: clean 1 level forward citation for each patent, then calculate the PageRank by either using graphlab package or solving eigen-problem of the transition matrix
 
-3. Extract features to predict the early expiration of a patent
+3. Predictor of Early Expiration
+	- Tool: feature engineering
 	- Features: backward patent citations, backward non-patent citaitons, ratio of backward citations made by inventor to made by patent examiner, semantic analysis, post issuance records
-		* Random Forrest
+	- How: convert features into numerics and build a Random Forrest Classifier with sklearn. Train the model with already expired patent data. Use GridSearch to find the best estimator. Then make predictions for current live patents.
 
 
 # Workflow
@@ -32,14 +75,14 @@ WHEN TO EXPIRE
 Phase 1: get data
 =======================================
 
-1) filename:  get_data_core.py
+1) filename:  get_data_patent_content.py
 ```
 	INPUT: None
-	OUTPUT: Patent database file -> ./my_database/database_core
+	OUTPUT: MongoDB database file -> ./database/patent_database.database_fields
 	POINTS TO: combine_my_data.py
 ```
 Purpose: download all patent data from patent topics "Drugs / Vasodialators / Gene Therapy / Other Drug Related" from webstie: 'freepatentsonline'
-How: using bs4 + requests, or import.io
+How: using bs4 + requests
 Go to the pages that have all of the industry patents, get all the patent numbers.
 then go to all the individual patent pages. from that page scrape the 'filling date', 'primary classes', 'other classes', 'US patent references', 'Attorney, Agent or Firm', 'link', 'title', 'abstract', 'claims', 'description'
 then store all that iinformation into database 'database_core'
@@ -47,13 +90,13 @@ then store all that iinformation into database 'database_core'
 2) filename:  get_data_maintenance.py
 ```
 	INPUT: maintenancefee.txt
-	OUTPUT: Patent maintenance database file -> ./my_database/database_maintenance
+	OUTPUT: Patent maintenance database file -> ./my_database/database_maintenance.sqlite3
 	POINTS TO: combine_my_data.py
 ```
 Purpose: parse maintenancefee.txt, get maintenance action records for each patent
 then store all that information into database 'database_maintenance'
 
-*3) filename:  get_data_assignment.py
+3) filename:  get_data_assignment.py
 ```
 	INPUT: None
 	OUTPUT: Patent assignment database file -> ./my_database/database_assignment
@@ -71,7 +114,7 @@ filename: combine_my_database.py
 	OUTPUT: Patent assignment database file -> ./my_database/full_database
 	POINTS TO: get_query.py, [*populate_features.py, *calc_life_and_cost.py]
 ```
-output file: _database.py
+output file: patent_database
 type: sql or *mongo
 why:  store patent info given from get_data_core.py + get_data_assignment + get_data_maintenance.py
 how: use psycopg to create new database called full_database.db.
@@ -89,14 +132,14 @@ Phase 3: populate data
 why: store patent citation data
 how: use pandas to create new database called citation_database, which includes patent# and patent citations.
 
-*2) filename: populate_features.py
+2) filename: populate_features.py
 ```
 	INPUT: full_database
 	OUTPUT: reference relation database -> ./my_database/features_database
 	POINTS TO: build_model.py
 ```
 
-*3) filename: calc_life_and_cost.py
+3) filename: calc_life_and_cost.py
 ```
 	INPUT: full_database
 	OUTPUT: reference relation database -> ./my_database/life_cost_database
@@ -185,14 +228,19 @@ Phase7: web app
 |	|	|-- -- -- similarity.graphlab
 |	|	|-- -- -- -- data_viz.py
 |	|	|-- -- -- -- web_app.py
+|	|-- APP/
+|	|	|-- app.py
+|	|	|-- my_plot_plotly.py
+|	|	|-- patent_matcher.py (copied from ../CODE/)
+|	|	|-- patent_tokenizer.py (copied from ../CODE/)
 |	|-- DATA/
-|	|	|-- maintenance.txt --> maintenance.db
-|	|	|-- scape --> patent_info.db
-|	|	|-- scape --> patent_info.db
-|	|	|-- scape --> patent_info.db
+|	|	|-- maintenance.txt
+|	|	|-- 
+|	|	|-- 
+|	|	|-- 
 ```
 
-
+# Result
 
 ![png](results/chart_selected_patents.png)
 
