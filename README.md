@@ -1,12 +1,15 @@
 # Hunting4Patents
 
-Huting4Patents is a tool that finds patents that are valuable but likely to expire early.
+Hunting4Patents is a tool that finds patents that are valuable but likely to expire early.
 
-I built a custom web scraper to get patent data from website and build a clean database. I calculated the pagerank for each patent based on all-time citations. I built a Random Forest model to predict early expiration by utilizing patent features during its early life. A patent search engine based on content similarity comparison is provided for user's query.
+I built a custom web scraper to get patent data from several patent websites and build a clean database. To begin with the data, I built a patent search engine based on content similarity comparison to response user's query. I calculated the pagerank for each patent based on all-time citations. I built a Random Forest model to predict early expiration by utilizing patent features and early life events. 
 
 [Live Web App](http://ec2-52-10-83-141.us-west-2.compute.amazonaws.com/) (Now available for pharmaceutical patents search)
 
 [Project Proposal](Preliminary_Project_Proposal.md)
+
+<a target="_blank"><img src="/results/citation_network.png" 
+alt="Citation network of a collection of patents" align='middle' width="400" border="10" /></a>
 
 ![png](results/citation_network.png)
 (citation network of a collection of patents)
@@ -15,11 +18,11 @@ I built a custom web scraper to get patent data from website and build a clean d
 
 We are in a world of inventions. Making inventions and making use of the inventions are key to a company's success.
 
-US patent law grants the patent owner exclusive rights of the invention of 20 years. By granting the right to produce a new product without fear of competition, patents provide incentive for companies or individuals to continue developing innovative new products or services. 
+US patent law grants the patent owner exclusive rights of the invention for 20 years. By granting the right to produce a new product without fear of competition, patents provide incentive for companies or individuals to continue developing innovative new products or services. 
 
 One example is that pharmaceutical companies spend large sums on research and development and patents are essential to earning a profit.
 
-On ther other hand, if you own a business and you want to make use of others' patents for your business, you may want to find a way to identify those patents that (1) are related to your business, (2) valuable, for example in terms of popularity, and (3) are like to expire soon.
+On ther other hand, if you own a business and you want to make use of others' patents for your business, you may want to find a way to identify those patents that (1) are related to your business, (2) valuable, for example in terms of popularity in the field, and (3) are likely to expire soon.
 
 Therefore, the goal of this project to build a tool that calculates the metrics for these 3 needs and makes the best recommendations.
 
@@ -41,13 +44,13 @@ The initial implementation collected 2465 patents in the field of pharmaceutical
 Features are the useful properties underlying the raw data. I extracted the following features to build my models
 
 * Patent text content
-	* --> convert to tf-idf vectors
+	* --> to be converted to tf-idf vectors
 
 * Patent citation
-	* --> convert to connections between patents
+	* --> to be modeled as connections between patents
 
-* Bibliographical information, maintenance events
-	* --> to be utilized by feature engineering
+* Bibliographical information, maintenance events, etc.
+	* --> to be utilized for feature engineering
 
 
 # Models
@@ -57,17 +60,22 @@ The goal is to find 3 metrics of RELEVANCY, VALUE, WHEN TO EXPIRE, so I built a 
 1. Search Engine
 	- Tool: Natural Language Processing
 	- Features: tf-idf vectors
-	- How: calculate similarity score weighted by title, abstract, and claims
+	- How: calculate similarity score weighted by title, abstract, and claims, and return the patents with highest similarity
 
 2. Ranking
 	- Tool: network and PageRank
 	- Features: all-time citations
-	- How: clean 1 level forward citation for each patent, then calculate the PageRank by either using graphlab package or solving eigen-problem of the transition matrix
+	- How: get 1 level depth forward citation for each patent, then calculate the PageRank by either using graphlab package or solving eigen-problem of the transition matrix
 
 3. Predictor of Early Expiration
 	- Tool: feature engineering
 	- Features: backward patent citations, backward non-patent citaitons, ratio of backward citations made by inventor to made by patent examiner, semantic analysis, post issuance records
-	- How: convert features into numerics and build a Random Forrest Classifier with sklearn. Train the model with already expired patent data. Use GridSearch to find the best estimator. Then make predictions for current live patents.
+	- How: convert features into numerics and build a Random Forrest Classifier with sklearn. Train the model with already expired patent data (early expiration and natural expiration). Use GridSearch to find the best estimator. Then make predictions for current live patents.
+
+
+# Product
+
+[Live Web App](http://ec2-52-10-83-141.us-west-2.compute.amazonaws.com/) (Now available for pharmaceutical patents search)
 
 
 # Workflow
@@ -78,14 +86,14 @@ Phase 1: get data
 1) filename:  get_data_patent_content.py
 ```
 	INPUT: None
-	OUTPUT: MongoDB database file -> ./database/patent_database.database_fields
+	OUTPUT: MongoDB database file -> ./database/patent_database.patent_fields
 	POINTS TO: combine_my_data.py
 ```
 Purpose: download all patent data from patent topics "Drugs / Vasodialators / Gene Therapy / Other Drug Related" from webstie: 'freepatentsonline'
 How: using bs4 + requests
 Go to the pages that have all of the industry patents, get all the patent numbers.
 then go to all the individual patent pages. from that page scrape the 'filling date', 'primary classes', 'other classes', 'US patent references', 'Attorney, Agent or Firm', 'link', 'title', 'abstract', 'claims', 'description'
-then store all that iinformation into database 'database_core'
+then store all that iinformation into database 'patent_database.patent_fields'
 
 2) filename:  get_data_maintenance.py
 ```
@@ -94,15 +102,15 @@ then store all that iinformation into database 'database_core'
 	POINTS TO: combine_my_data.py
 ```
 Purpose: parse maintenancefee.txt, get maintenance action records for each patent
-then store all that information into database 'database_maintenance'
+then store all that information into database 'database_maintenance.sqlite3'
 
 3) filename:  get_data_assignment.py
 ```
 	INPUT: None
 	OUTPUT: Patent assignment database file -> ./my_database/database_assignment
-	POINTS TO: cobine_my_data.py
+	POINTS TO: combine_my_data.py
 ```
-Purpose: download all patent assignment data of individual patent from webstie: 'http://assignment.uspto.gov/'
+Purpose: download patent assignment data of individual patent from webstie: 'http://assignment.uspto.gov/'
 then store all that iinformation into database 'database_assignment'
 
 
