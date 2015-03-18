@@ -2,11 +2,17 @@
 
 Huting4Patents is a tool that finds patents that are valuable but likely to expire early.
 
+[Live Web App](http://ec2-52-10-83-141.us-west-2.compute.amazonaws.com/) (Now available for pharmaceutical patents search)
+
 [Project Proposal](Preliminary_Project_Proposal.md)
 
 ![png](results/citation_network.png)
 
 # Models
+
+RELEVANCY
+VALUE
+WHEN TO EXPIRE
 
 1. Search Engine
 	- Natural Language Processing
@@ -35,12 +41,12 @@ Phase 1: get data
 Purpose: download all patent data from patent topics "Drugs / Vasodialators / Gene Therapy / Other Drug Related" from webstie: 'freepatentsonline'
 How: using bs4 + requests, or import.io
 Go to the pages that have all of the industry patents, get all the patent numbers.
-then go to all the individual patent pages. from that page scrape the 'filling date', 'primary classes', 'other classes', 'US patent references', 'Attorney, Agent or Firm', 'link', 'title', 'abstract', 'claim', 'description'
+then go to all the individual patent pages. from that page scrape the 'filling date', 'primary classes', 'other classes', 'US patent references', 'Attorney, Agent or Firm', 'link', 'title', 'abstract', 'claims', 'description'
 then store all that iinformation into database 'database_core'
 
-*2) filename:  get_data_maintenance.py
+2) filename:  get_data_maintenance.py
 ```
-INPUT: maintenancefee.txt
+	INPUT: maintenancefee.txt
 	OUTPUT: Patent maintenance database file -> ./my_database/database_maintenance
 	POINTS TO: combine_my_data.py
 ```
