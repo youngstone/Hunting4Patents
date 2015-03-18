@@ -8,11 +8,11 @@ I built a custom web scraper to get patent data from several patent websites and
 
 [Project Proposal](Preliminary_Project_Proposal.md)
 
-<a target="_blank"><img src="/results/citation_network.png" 
-alt="Citation network of a collection of patents" align='middle' width="400" border="10" /></a>
+<img style="float: middle" src="/results/citation_network.png">
 
-![png](results/citation_network.png)
-(citation network of a collection of patents)
+<!-- <a target="_blank"><img src="/results/citation_network.png" 
+alt="Citation network of a collection of patents" align='centered' width="500" border="10" /></a> -->
+
 
 # Incentive
 
@@ -253,6 +253,8 @@ Phase7: web app
 ![png](results/chart_selected_patents.png)
 
 
+![png](results/citation_network.png)
+(citation network of a collection of patents)
 
 
 
