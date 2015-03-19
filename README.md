@@ -8,11 +8,7 @@ I built a custom web scraper to get patent data from several patent websites and
 
 [Project Proposal](Preliminary_Project_Proposal.md)
 
-<img style="float: middle" src="/results/citation_network.png">
-
-<!-- <a target="_blank"><img src="/results/citation_network.png" 
-alt="Citation network of a collection of patents" align='centered' width="500" border="10" /></a> -->
-
+![png](results/chart_selected_patents.png)
 
 # Incentive
 
@@ -32,7 +28,7 @@ Therefore, the goal of this project to build a tool that calculates the metrics 
 I scraped and downloaded patent data from the following website:
 
 * [Google Patent Search](http://www.google.com/patents)
-* [Freepatentonline](http://www.freepatentsonline.com)
+* [Freepatentsonline](http://www.freepatentsonline.com)
 * [USPTO Patent Assignment Search](http://assignment.uspto.gov) 
 * [USPTO Patent Maintenance Fee Events](https://eipweb.uspto.gov/MaintFeeEvents/)
 * [Harvard Patent Network Dataverse](https://thedata.harvard.edu/dvn/dv/patent/faces/study/StudyPage.xhtml?globalId=hdl:1902.1/12367&studyListingIndex=0_b547d55c3b44eda0c6f7707020be)
@@ -73,12 +69,19 @@ The goal is to find 3 metrics of RELEVANCY, VALUE, WHEN TO EXPIRE, so I built a 
 	- How: convert features into numerics and build a Random Forrest Classifier with sklearn. Train the model with already expired patent data (early expiration and natural expiration). Use GridSearch to find the best estimator. Then make predictions for current live patents.
 
 
+
 # Product
 
 [Live Web App](http://ec2-52-10-83-141.us-west-2.compute.amazonaws.com/) (Now available for pharmaceutical patents search)
 
 
 # Workflow
+
+The overall workflow consists of the following parts:
+	data --> features --> models --> result delivery
+
+![png](results/Workflow.png)
+
 
 Phase 1: get data
 =======================================
@@ -93,7 +96,7 @@ Purpose: download all patent data from patent topics "Drugs / Vasodialators / Ge
 How: using bs4 + requests
 Go to the pages that have all of the industry patents, get all the patent numbers.
 then go to all the individual patent pages. from that page scrape the 'filling date', 'primary classes', 'other classes', 'US patent references', 'Attorney, Agent or Firm', 'link', 'title', 'abstract', 'claims', 'description'
-then store all that iinformation into database 'patent_database.patent_fields'
+then store all that information into database 'patent_database.patent_fields'
 
 2) filename:  get_data_maintenance.py
 ```
@@ -176,9 +179,8 @@ Model 1: pagerank
 ```
 	INPUT: citation_database.csv
 	OUTPUT: table_pagerank
-	POINTS TO: viz_pagerank.py
+	POINTS TO: app.py
 ```
-
 why: calculate pagerank
 how: use graphlab to calculate
 
@@ -189,7 +191,7 @@ Model 2: early expiration predictor
 ```
 	INPUT: 
 	OUTPUT: 
-	POINTS TO: 
+	POINTS TO: app.py
 ```
 
 Model 3: similarity
@@ -198,7 +200,7 @@ Model 3: similarity
 ```
 	INPUT: 
 	OUTPUT: 
-	POINTS TO: 
+	POINTS TO: app.py
 ```
 
 Phase 6: visualization
@@ -216,36 +218,32 @@ How: use plot.ly
 Phase7: web app
 =======================================
 ```
-	INPUT: 
-	OUTPUT: 
+	INPUT: patent_dataframe.pkl, user's query
+	OUTPUT: html pages
 ```
+
 
 # Code Structure
 
 ```
 -- HUNTING4PATENTS/
 |	|-- CODE/
-|	|	|-- get_data_core.py => to scrape data and store (main data, title, text, etc)
-|	|	|-- get_data_maintenance.py => to import data (maintenance fee)
-|	|	|-- get_data_transaction.py => to import transaction records
-|	|	|-- -- feature_extraction.py
+|	|	|-- get_data_patent_content.py => to scrape data from freepatentsonline and store (patent number, title, abstract, claims, etc)
+|	|	|-- get_data_maintenance.py => parse data (maintenance fee)
+|	|	|-- get_patent_status.py => to scrape from google patents (legal events)
+|	|	|-- -- clean_my_database.py
 |	|	|-- -- calculate_expiration_date.py
+|   |   |
 |	|	|-- -- -- life_events.py
 |	|	|-- -- -- citation_flow.py
-|	|	|-- -- -- citation_graph.gephi
-|	|	|-- -- -- similarity.graphlab
 |	|	|-- -- -- -- data_viz.py
-|	|	|-- -- -- -- web_app.py
 |	|-- APP/
-|	|	|-- app.py
+|	|	|-- app.py (based on Flask)
 |	|	|-- my_plot_plotly.py
 |	|	|-- patent_matcher.py (copied from ../CODE/)
 |	|	|-- patent_tokenizer.py (copied from ../CODE/)
 |	|-- DATA/
 |	|	|-- maintenance.txt
-|	|	|-- 
-|	|	|-- 
-|	|	|-- 
 ```
 
 # Result
