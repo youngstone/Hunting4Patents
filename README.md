@@ -2,13 +2,15 @@
 
 Hunting4Patents is a tool that finds patents that are valuable but likely to expire early.
 
-I built a custom web scraper to get patent data from several patent websites and build a clean database. To begin with the data, I built a patent search engine based on content similarity comparison to response user's query. I calculated the pagerank for each patent based on all-time citations. I built a Random Forest model to predict early expiration by utilizing patent features and early life events. 
+I built a custom web scraper to get patent data from several patent websites and build a clean database. To begin with the data, I built a patent search engine based on content similarity comparison to response user's query. To know the importance of a patent, I calculated the PageRank for each patent based on all-time citations. I built a Random Forest model to predict early expiration by utilizing patent features and early life events. 
 
 [Live Web App](http://ec2-52-10-83-141.us-west-2.compute.amazonaws.com/) (Now available for pharmaceutical patents search)
 
 [Project Proposal](Preliminary_Project_Proposal.md)
 
-![png](results/chart_selected_patents.png)
+![png](results/citation_network.png)
+(citation network of a collection of patents)
+
 
 # Incentive
 
@@ -35,6 +37,7 @@ I scraped and downloaded patent data from the following website:
 
 The initial implementation collected 2465 patents in the field of pharmaceutical industry. 
 
+
 # Features
 
 Features are the useful properties underlying the raw data. I extracted the following features to build my models
@@ -59,7 +62,7 @@ The goal is to find 3 metrics of RELEVANCY, VALUE, WHEN TO EXPIRE, so I built a 
 	- How: calculate similarity score weighted by title, abstract, and claims, and return the patents with highest similarity
 
 2. Ranking
-	- Tool: network and PageRank
+	- Tool: network and [PageRank](http://en.wikipedia.org/wiki/PageRank)
 	- Features: all-time citations
 	- How: get 1 level depth forward citation for each patent, then calculate the PageRank by either using graphlab package or solving eigen-problem of the transition matrix
 
@@ -67,7 +70,6 @@ The goal is to find 3 metrics of RELEVANCY, VALUE, WHEN TO EXPIRE, so I built a 
 	- Tool: feature engineering
 	- Features: backward patent citations, backward non-patent citaitons, ratio of backward citations made by inventor to made by patent examiner, semantic analysis, post issuance records
 	- How: convert features into numerics and build a Random Forrest Classifier with sklearn. Train the model with already expired patent data (early expiration and natural expiration). Use GridSearch to find the best estimator. Then make predictions for current live patents.
-
 
 
 # Product
@@ -90,7 +92,7 @@ Phase 1: get data
 ```
 	INPUT: None
 	OUTPUT: MongoDB database file -> ./database/patent_database.patent_fields
-	POINTS TO: combine_my_data.py
+	POINTS TO: clean_my_data.py
 ```
 Purpose: download all patent data from patent topics "Drugs / Vasodialators / Gene Therapy / Other Drug Related" from webstie: 'freepatentsonline'
 How: using bs4 + requests
@@ -102,65 +104,47 @@ then store all that information into database 'patent_database.patent_fields'
 ```
 	INPUT: maintenancefee.txt
 	OUTPUT: Patent maintenance database file -> ./my_database/database_maintenance.sqlite3
-	POINTS TO: combine_my_data.py
+	POINTS TO: clean_my_data.py
 ```
 Purpose: parse maintenancefee.txt, get maintenance action records for each patent
 then store all that information into database 'database_maintenance.sqlite3'
 
-3) filename:  get_data_assignment.py
+3) filename:  get_patent_status.py
 ```
 	INPUT: None
-	OUTPUT: Patent assignment database file -> ./my_database/database_assignment
-	POINTS TO: combine_my_data.py
+	OUTPUT: Patent database file -> ./my_database/patent_database.patent_status
+	POINTS TO: clean_my_data.py
 ```
-Purpose: download patent assignment data of individual patent from webstie: 'http://assignment.uspto.gov/'
-then store all that iinformation into database 'database_assignment'
+Purpose: scrape status data of individual patent from google patents,
+then store all that iinformation into database 'patent_database.patent_status'
 
 
-Phase 2: combine my database
+Phase 2: clean my database
 =======================================
-filename: combine_my_database.py
+filename: clean_my_data.py
 ```
-	INPUT: None
-	OUTPUT: Patent assignment database file -> ./my_database/full_database
-	POINTS TO: get_query.py, [*populate_features.py, *calc_life_and_cost.py]
+	INPUT: patent_database
+	OUTPUT: combined patent database file -> ./my_database/patent_dataframe.pkl
+	POINTS TO: get_reference_data.py
 ```
-output file: patent_database
-type: sql or *mongo
-why:  store patent info given from get_data_core.py + get_data_assignment + get_data_maintenance.py
-how: use psycopg to create new database called full_database.db.
-	 take data from database_core + database_assignment + database_maintenance, and insert into full_database.db.
+output file: patent_database.pkl
+type: pandas dataframe
+why:  store patent info given from get_data_content.py + get_patent_status.py + get_data_maintenance.py
+how: read data from mongodb, sqlite3 from database_core + database_assignment + database_maintenance, and convert to patent_dataframe.pkl
 
 
 Phase 3: populate data
 =======================================
 1) filename: get_reference_data.py
 ```
-	INPUT: full_database
+	INPUT: pandas dataframe patent_database.pkl
 	OUTPUT: reference relation database -> ./my_database/citation_database
 	POINTS TO: get_reference_relations.py
 ```
-why: store patent citation data
-how: use pandas to create new database called citation_database, which includes patent# and patent citations.
+why: extract patent citation data
+how: use pandas to create new database called citation_database, which includes patent number and 1 level forward citations.
 
-2) filename: populate_features.py
-```
-	INPUT: full_database
-	OUTPUT: reference relation database -> ./my_database/features_database
-	POINTS TO: build_model.py
-```
-
-3) filename: calc_life_and_cost.py
-```
-	INPUT: full_database
-	OUTPUT: reference relation database -> ./my_database/life_cost_database
-	POINTS TO: build_regression_model.py
-```
-
-
-Phase 4: get working data
-=======================================
-1) filename: get_reference_relations.py
+2) filename: get_reference_relations.py
 ```
 	INPUT: citation_database
 	OUTPUT: citation relation file -> ./my_data/citation.csv
@@ -169,12 +153,28 @@ Phase 4: get working data
 why: get rows of one-to-one citation relation
 how: use pandas pivot_table 
 
+3) filename: get_patent_text.py
+```
+	INPUT: patent_dataframe.pkl
+	OUTPUT: pandas dataframe file -> ./my_database/patent_text.pkl
+	POINTS TO: patent_tokenizer.py, patent_matcher.py
+```
 
-Phase 5: build model
+
+Phase 4: build model
 =======================================
-Model 1: pagerank
----------------------------------------
 
+Model 1: similarity
+---------------------------------------
+3) filename: patent_matcher.py
+```
+	INPUT: 
+	OUTPUT: 
+	POINTS TO: app.py
+```
+
+Model 2: pagerank
+---------------------------------------
 1) filename: calc_pagerank.py
 ```
 	INPUT: citation_database.csv
@@ -184,8 +184,7 @@ Model 1: pagerank
 why: calculate pagerank
 how: use graphlab to calculate
 
-
-Model 2: early expiration predictor
+Model 3: early expiration predictor
 ---------------------------------------
 2) filename: patent_life_predictor.py
 ```
@@ -194,31 +193,22 @@ Model 2: early expiration predictor
 	POINTS TO: app.py
 ```
 
-Model 3: similarity
----------------------------------------
-3) filename: patent_matcher.py
-```
-	INPUT: 
-	OUTPUT: 
-	POINTS TO: app.py
-```
 
-Phase 6: visualization
+Phase 5: visualization
 =======================================
 ```
 	INPUT: patent_dataframe.pkl
 	OUTPUT: table, chart
 	POINTS TO: web app
 ```
-
 What: graph, table
 How: use plot.ly
 
 
-Phase7: web app
+Phase 6: web app
 =======================================
 ```
-	INPUT: patent_dataframe.pkl, user's query
+	INPUT: patent_dataframe.pkl, patent_text.pkl, user's query
 	OUTPUT: html pages
 ```
 
@@ -228,31 +218,31 @@ Phase7: web app
 ```
 -- HUNTING4PATENTS/
 |	|-- CODE/
-|	|	|-- get_data_patent_content.py => to scrape data from freepatentsonline and store (patent number, title, abstract, claims, etc)
-|	|	|-- get_data_maintenance.py => parse data (maintenance fee)
-|	|	|-- get_patent_status.py => to scrape from google patents (legal events)
+|	|	|-- get_data_patent_content.py
+|	|	|-- get_data_maintenance.py
+|	|	|-- get_patent_status.py
 |	|	|-- -- clean_my_database.py
-|	|	|-- -- calculate_expiration_date.py
-|   |   |
-|	|	|-- -- -- life_events.py
-|	|	|-- -- -- citation_flow.py
-|	|	|-- -- -- -- data_viz.py
+|	|	|-- -- get_reference_data.py
+|	|	|-- -- -- calc_pagerank.py
+|	|	|-- -- -- patent_matcher.py
+|	|	|-- -- -- patent_tokenizer.py
 |	|-- APP/
 |	|	|-- app.py (based on Flask)
 |	|	|-- my_plot_plotly.py
 |	|	|-- patent_matcher.py (copied from ../CODE/)
 |	|	|-- patent_tokenizer.py (copied from ../CODE/)
-|	|-- DATA/
+|	|-- DATABASE/
 |	|	|-- maintenance.txt
+|   |   |-- citation.sqlite3
 ```
 
 # Result
 
+Result to a sample query:
 ![png](results/chart_selected_patents.png)
 
-
+Citation network of a collection of patents:
 ![png](results/citation_network.png)
-(citation network of a collection of patents)
 
 
 
