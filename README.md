@@ -2,7 +2,7 @@
 
 Hunting4Patents is a tool that finds patents that are valuable but likely to expire early.
 
-I built a custom web scraper to get patent data from several patent websites and build a clean database. To begin with the data, I built a patent search engine based on content similarity comparison to response user's query. To know the importance of a patent, I calculated the PageRank for each patent based on all-time citations. I built a Random Forest model to predict early expiration by utilizing patent features and early life events. 
+I built a custom web scraper to get patent data from several patent websites and built a clean database. To begin with the data, I built a patent search engine based on content similarity comparison to response user's query. To know the importance of a patent, I calculated the PageRank for each patent based on all-time citations. I used Random Forest to predict early expiration by utilizing patent features and early life events. 
 
 [Live Web App](http://ec2-52-10-83-141.us-west-2.compute.amazonaws.com/) (Now available for pharmaceutical patents search)
 
@@ -20,10 +20,13 @@ US patent law grants the patent owner exclusive rights of the invention for 20 y
 
 One example is that pharmaceutical companies spend large sums on research and development and patents are essential to earning a profit.
 
-On ther other hand, if you own a business and you want to make use of others' patents for your business, you may want to find a way to identify those patents that (1) are related to your business, (2) valuable, for example in terms of popularity in the field, and (3) are likely to expire soon.
+On the other hand, if you own a business and you want to make use of others' patents for your business, you may want to find a way to identify those patents that (1) are related to your business, (2) valuable, for example in terms of popularity in the field, and (3) are likely to expire soon.
 
 Therefore, the goal of this project to build a tool that calculates the metrics for these 3 needs and makes the best recommendations.
 
+* RELEVANCY
+* VALUE
+* WHEN TO EXPIRE
 
 # Data
 
@@ -95,10 +98,9 @@ Phase 1: get data
 	POINTS TO: clean_my_data.py
 ```
 Purpose: download all patent data from patent topics "Drugs / Vasodialators / Gene Therapy / Other Drug Related" from webstie: 'freepatentsonline'
-How: using bs4 + requests
-Go to the pages that have all of the industry patents, get all the patent numbers.
-then go to all the individual patent pages. from that page scrape the 'filling date', 'primary classes', 'other classes', 'US patent references', 'Attorney, Agent or Firm', 'link', 'title', 'abstract', 'claims', 'description'
-then store all that information into database 'patent_database.patent_fields'
+
+How: using bs4 + requests, go to the pages that have all of the industry patents, get all the patent numbers. Then go to all the individual patent pages. from that page scrape the 'filling date', 'primary classes', 'other classes', 'US patent references', 'Attorney, Agent or Firm', 'link', 'title', 'abstract', 'claims', 'description'
+then store all that information into database
 
 2) filename:  get_data_maintenance.py
 ```
@@ -106,8 +108,7 @@ then store all that information into database 'patent_database.patent_fields'
 	OUTPUT: Patent maintenance database file -> ./my_database/database_maintenance.sqlite3
 	POINTS TO: clean_my_data.py
 ```
-Purpose: parse maintenancefee.txt, get maintenance action records for each patent
-then store all that information into database 'database_maintenance.sqlite3'
+Purpose: parse maintenancefee.txt, get maintenance action records for each patent then store all that information into database
 
 3) filename:  get_patent_status.py
 ```
@@ -127,9 +128,8 @@ filename: clean_my_data.py
 	OUTPUT: combined patent database file -> ./my_database/patent_dataframe.pkl
 	POINTS TO: get_reference_data.py
 ```
-output file: patent_database.pkl
-type: pandas dataframe
 why:  store patent info given from get_data_content.py + get_patent_status.py + get_data_maintenance.py
+
 how: read data from mongodb, sqlite3 from database_core + database_assignment + database_maintenance, and convert to patent_dataframe.pkl
 
 
@@ -142,6 +142,7 @@ Phase 3: populate data
 	POINTS TO: get_reference_relations.py
 ```
 why: extract patent citation data
+
 how: use pandas to create new database called citation_database, which includes patent number and 1 level forward citations.
 
 2) filename: get_reference_relations.py
@@ -151,6 +152,7 @@ how: use pandas to create new database called citation_database, which includes 
 	POINTS TO: calc_pagerank.py
 ```
 why: get rows of one-to-one citation relation
+
 how: use pandas pivot_table 
 
 3) filename: get_patent_text.py
@@ -182,6 +184,7 @@ Model 2: pagerank
 	POINTS TO: app.py
 ```
 why: calculate pagerank
+
 how: use graphlab to calculate
 
 Model 3: early expiration predictor
@@ -202,6 +205,7 @@ Phase 5: visualization
 	POINTS TO: web app
 ```
 What: graph, table
+
 How: use plot.ly
 
 
