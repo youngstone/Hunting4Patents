@@ -9,7 +9,6 @@ I built a custom web scraper to get patent data from several patent websites and
 [Project Proposal](Preliminary_Project_Proposal.md)
 
 ![png](results/citation_network.png)
-(citation network of a collection of patents)
 
 
 # Incentive
@@ -240,7 +239,7 @@ Phase 6: web app
 |   |   |-- citation.sqlite3
 ```
 
-# Result
+# Findings
 
 Result to a sample query:
 ![png](results/chart_selected_patents.png)
