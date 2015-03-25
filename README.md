@@ -239,6 +239,24 @@ Phase 6: web app
 |   |   |-- citation.sqlite3
 ```
 
+
+# Packages Used
+
+* bs4
+* pandas
+* numpy
+* scipy
+* datetime
+* pymongo
+* graphlab
+* sqlite3
+* sklearn
+* nltk
+* re
+* matplotlib
+* plotly
+
+
 # Findings
 
 Result to a sample query:
