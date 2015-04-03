@@ -4,7 +4,7 @@ Hunting4Patents is a tool that finds patents that are valuable but likely to exp
 
 I built a custom web scraper to get patent data from several patent websites and built a clean database. To begin with the data, I built a patent search engine based on content similarity comparison to response user's query. To know the importance of a patent, I calculated the PageRank for each patent based on all-time citations. I used Random Forest to predict early expiration by utilizing patent features and early life events. 
 
-[Live Web App](http://ec2-52-10-83-141.us-west-2.compute.amazonaws.com/) (Now available for pharmaceutical patents search)
+[Live Web App](http://ec2-54-149-42-16.us-west-2.compute.amazonaws.com/) (Now available for pharmaceutical patents search)
 
 [Project Proposal](Preliminary_Project_Proposal.md)
 
@@ -76,7 +76,7 @@ The goal is to find 3 metrics of RELEVANCY, VALUE, WHEN TO EXPIRE, so I built a 
 
 # Product
 
-[Live Web App](http://ec2-52-10-83-141.us-west-2.compute.amazonaws.com/) (Now available for pharmaceutical patents search)
+[Live Web App](http://ec2-54-149-42-16.us-west-2.compute.amazonaws.com/) (Now available for pharmaceutical patents search)
 
 
 # Workflow
