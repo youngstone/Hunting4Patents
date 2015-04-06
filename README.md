@@ -2,7 +2,7 @@
 
 Hunting4Patents is a tool that finds patents that are valuable but likely to expire early.
 
-I built a custom web scraper to get patent data from several patent websites and built a clean database. To begin with the data, I built a patent search engine based on content similarity comparison to response user's query. To know the importance of a patent, I calculated the PageRank for each patent based on all-time citations. I used Random Forest to predict early expiration by utilizing patent features and early life events. 
+I built a custom web scraper to get patent data from several patent websites and built a clean database. To begin with the data, I built a patent search engine based on content similarity comparison to respond to user's query. To know the importance of a patent, I calculated the PageRank for each patent based on all-time citations. I used Random Forest to predict early expiration by utilizing patent features and early life events. 
 
 [Live Web App](http://ec2-54-149-42-16.us-west-2.compute.amazonaws.com/) (Now available for pharmaceutical patents search)
 
@@ -13,7 +13,7 @@ I built a custom web scraper to get patent data from several patent websites and
 
 # Incentive
 
-We are in a world of inventions. Making inventions and making use of the inventions are key to a company's success.
+We are in a world of inventions. Making inventions and making use of the inventions are key to companies' success.
 
 US patent law grants the patent owner exclusive rights of the invention for 20 years. By granting the right to produce a new product without fear of competition, patents provide incentive for companies or individuals to continue developing innovative new products or services. 
 
@@ -66,7 +66,7 @@ The goal is to find 3 metrics of RELEVANCY, VALUE, WHEN TO EXPIRE, so I built a 
 2. Ranking
 	- Tool: network and [PageRank](http://en.wikipedia.org/wiki/PageRank)
 	- Features: all-time citations
-	- How: get 1 level depth forward citation for each patent, then calculate the PageRank by either using graphlab package or solving eigen-problem of the transition matrix
+	- How: get 1 level depth forward citation for each patent, then calculate the PageRank by solving eigen-problem of the transition matrix
 
 3. Predictor of Early Expiration
 	- Tool: feature engineering

@@ -21,7 +21,7 @@ There are two aspects of the US patent law:
 
 1) Exclusive protection of patents are given to the patent owner, thus innovations are fostered.
 
-2) In exchange to the protect, patents are disclosed and the protection is only for a limited time. Therefore, other people are allowed to practice the patent once it becomes expired.
+2) In exchange to the protect, patents are disclosed and the protection is only for a limited time. Therefore, other people are allowed to practice a patent once it becomes expired.
 
 ### Idea
 Due to the unique role of patent law, it may interest companies to know the ecosystem of the patents that are related to their business and to include this knowledge when they make strategic decisions.
